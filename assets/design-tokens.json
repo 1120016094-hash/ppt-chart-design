@@ -1,0 +1,90 @@
+{
+  "_meta": {
+    "purpose": "Canonical palette / typography / illustration tokens for 5 chart-design styles. Hex values were sampled from reference works pixel-by-pixel. Render scripts and style references read from this file.",
+    "fonts_note": "Each style lists the original (often commercial) font plus a free fallback. Render scripts should try the listed family and fall back to a generic sans/serif if unavailable.",
+    "output_mode": "high_fidelity_image",
+    "comment_output": "Charts are rendered to PNG/SVG at high DPI and inserted into PPTX as pictures (not native editable charts). See scripts/."
+  },
+
+  "style_1_airy_systematic": {
+    "label": "\u6e05\u900f\u7cfb\u7edf\u4fe1\u606f\u56fe",
+    "background": "#FEFFFF",
+    "background_alt_gradient": ["#E8EDFB", "#FEFFFF"],
+    "main": "#4DCABE",
+    "key": "#087C95",
+    "accent": "#FDB697",
+    "categorical": ["#087C95", "#4DCABE", "#46508A", "#FDB697", "#B2DBDD"],
+    "sequential": ["#087C95", "#2EA3A0", "#4DCABE", "#8AD4C9", "#B2DBDD", "#E0F1F1"],
+    "diverging": ["#087C95", "#B2DBDD", "#FDB697"],
+    "text": "#3A4A4F",
+    "text_muted": "#B1BAC4",
+    "grid": "#E0E3E8",
+    "fonts": {"title": ["Pretendard", "Noto Sans CJK SC", "Inter", "sans-serif"], "body": ["Pretendard", "Noto Sans CJK SC", "Inter", "sans-serif"]},
+    "type_rules": {"title_weight": "bold", "title_tracking_px": -2, "title_is_conclusion": true, "kicker_color": "#087C95"},
+    "chart_rules": {"grid": false, "spines": false, "legend": "avoid_direct_label", "overlay_alpha": 0.6, "shadow": false, "bar_axis_from_zero": true},
+    "illustration": {"mode": "none", "note": "Style relies on alpha-overlay and gradient fills, not generated illustration."}
+  },
+
+  "style_2_retro_editorial": {
+    "label": "\u590d\u53e4\u7f51\u683c\u7f16\u8f91\u4fe1\u606f\u56fe",
+    "recipes": {
+      "A_sage":   {"bg": "#E1EEDD", "accent1": "#CC8448", "accent2": "#488460", "cream": "#F6F7E8", "black": "#1A1A1A"},
+      "B_powder": {"bg": "#C8E1E5", "accent1": "#18909C", "accent2": "#E44848", "pink": "#F3C9C3", "black": "#1A1A1A"},
+      "C_green":  {"bg": "#54A860", "shade": "#516A52", "light": "#B8D5B7", "black": "#272927"},
+      "D_blkyel": {"bg": "#F3F4E4", "accent1": "#F0CC30", "black": "#111111", "white": "#FFFFFF"},
+      "E_mono":   {"bg": "#F9F8F4", "black": "#000000", "white": "#FFFFFF", "hatch": "#CACACA", "hatch_dark": "#6F6E6E"}
+    },
+    "fonts": {"title": ["Anton", "Archivo Black", "Oswald", "sans-serif"], "body": ["Inter", "Archivo", "sans-serif"]},
+    "type_rules": {"mixed_weight_title": true, "pill_labels": true, "big_numbers": true},
+    "chart_rules": {"grid_rules_px": 1.5, "grid_rules_color": "black", "texture_fill_for_secondary": "hatch", "isotype": true, "leader_dots": true, "fill": "flat"},
+    "illustration": {"mode": "generate", "kind": "flat_2tone_riso", "prompt_fragment": "flat 2-tone bold-outline editorial vector illustration, palette limited to {recipe_colors}, high contrast, risograph / screen-print look, no text, no gradient", "fallback": "icon_library + isotype", "guardrail_no_ip": true}
+  },
+
+  "style_3_metaphor_object": {
+    "label": "\u9690\u55bb\u7269\u8c61\u7f16\u8f91\u4fe1\u606f\u56fe",
+    "background": "#EAEADE",
+    "red": "#C45446",
+    "red_dark": "#A8382A",
+    "indigo": "#46467E",
+    "indigo_dark": "#383870",
+    "text": "#1A1A1A",
+    "fonts": {"title_serious": ["Playfair Display", "serif"], "title_display": ["Anton", "Oswald", "sans-serif"], "body": ["Inter", "sans-serif"]},
+    "type_rules": {"theme_matched_typeface": true, "big_number": true, "bracket_captions": true},
+    "chart_rules": {"object_as_chart": true, "stamp_badge": true, "leader_dots": true, "whitespace": "high", "object_keeps_native_color": true},
+    "illustration": {"mode": "generate", "kind": "photographic_or_painterly_object_on_cream", "prompt_fragment": "high-quality {photo|thick-paint} illustration of {generic_object}, isolated on warm off-white #EAEADE background, soft natural shadow, centered, no text, editorial infographic poster aesthetic", "guardrail_no_ip": true, "guardrail_note": "Use only generic, non-branded, non-IP objects; no real identifiable people; original wordplay titles only."}
+  },
+
+  "style_4_corporate_gradient": {
+    "label": "\u4f01\u4e1a\u6e10\u53d8\u6a21\u677f\u4fe1\u606f\u56fe",
+    "background": "#F8F8F8",
+    "gradient": ["#00A0FA", "#5064FA", "#6E14AA"],
+    "gradient_angle_deg": 135,
+    "icon": "#FFFFFF",
+    "text": "#333333",
+    "text_muted": "#8A8A8A",
+    "fonts": {"title": ["Poppins", "Montserrat", "sans-serif"], "body": ["Inter", "Open Sans", "sans-serif"]},
+    "type_rules": {"two_tone_title": true, "step_numbers_gradient": true},
+    "chart_rules": {"rounded": true, "soft_shadow": true, "glossy_gradient": true, "white_icons": true, "single_hue_only": true, "levels_by_gradient_depth": true},
+    "best_for": ["process", "cycle", "hierarchy", "relationship", "timeline", "map", "comparison_concept"],
+    "illustration": {"mode": "generate", "kind": "flat_vector_gradient", "prompt_fragment": "flat vector illustration of {generic_object_or_isometric_scene}, smooth blue-to-purple gradient fill #00A0FA to #6E14AA, white reversed details, soft drop shadow, rounded friendly shapes, clean corporate infographic, plain white background, no text", "guardrail_no_ip": true}
+  },
+
+  "style_5_magazine_monochrome": {
+    "label": "\u6742\u5fd7\u4e13\u9898\u5355\u8272\u4fe1\u606f\u56fe",
+    "recipes": {
+      "cobalt": {"dominant": "#006CC0", "contrast": "#FC3C30", "tint": "#FC9CC0", "neutral": "#FFFFFF", "title": "#FFFFFF"},
+      "coral":  {"dominant": "#F07860", "deep": "#3A2A4A", "neutral": "#FFFFFF", "title": "#FFFFFF"},
+      "sage":   {"dominant": "#789C84", "neutral": "#FCE4C0", "contrast": "#F06C54", "title": "#FFFFFF"},
+      "aubergine": {"dominant": "#604884", "contrast": "#E43078", "accent2": "#F0CC30", "title": "#F0CC30"},
+      "taupe":  {"dominant": "#6C6054", "contrast": "#E4843C", "neutral": "#EAEADE", "title": "#E4843C"},
+      "paleblue": {"dominant": "#006CA8", "accent": "#F0CC60", "bg": "#F0F0F0", "title": "#006CA8"},
+      "night":  {"dominant": "#242424", "contrast": "#D890A8", "title": "#D890A8", "rainbow_for_legend": true},
+      "teal":   {"dominant": "#306060", "neutral": "#F0F0D8", "title": "#F0F0D8"}
+    },
+    "recipe_formula": "Pick 1 dominant hue -> fill whole page -> build levels from its tints/shades -> add 1 cream/neutral -> reserve 1 contrast for title + key numbers.",
+    "fonts": {"title": ["Oswald", "Anton", "Archivo Narrow", "sans-serif"], "deck": ["Playfair Display", "Georgia", "serif"], "subhead": ["Oswald", "sans-serif"]},
+    "type_rules": {"compressed_bold_title": true, "smallcaps_subhead_underline": true, "big_number_contrast": true, "masthead_label": true, "double_rule": true},
+    "chart_rules": {"full_bleed_bg": true, "tints_for_levels": true, "leader_dots": true, "rich_chart_variety": true, "supports": ["donut", "radial_stacked_bar", "radar", "isometric_pictogram", "isometric_cubes", "circular_radial", "bar"]},
+    "illustration": {"mode": "generate", "kind": "isometric_monochrome", "prompt_fragment": "isometric flat illustration of {generic_pictogram_subject}, monochromatic palette in shades of {dominant} plus one cream tone, subtle shadow, editorial magazine infographic style, plain background, no text", "guardrail_no_ip": true}
+  }
+}
