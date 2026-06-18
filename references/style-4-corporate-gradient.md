@@ -45,6 +45,12 @@ retry image generation or approve a fallback. Guardrail: generic only.
   clearest corporate structure for the data: process, timeline, map, hierarchy, funnel,
   relationship diagram, or peer card grid. Use gradient polish to clarify order and
   grouping, not to make the slide more complex.
+- Do not add standalone gradient blobs, ellipses, waves, clouds, or abstract color
+  patches merely to make the page look corporate. Every visible gradient shape must have
+  one of these roles: data mark, rank/step node, bar/segment, connector/arrow, icon
+  container, selected highlight, or soft grouping field that directly contains/organizes
+  related content. A decorative shape in an empty corner, behind no related content, or
+  detached from the template structure must be removed even if it matches the palette.
 - If used inside a PPT workflow, inherit the PPT background first. Adapt card fills,
   gradients, shadows, and text contrast to that background; avoid dropping an unrelated
   white template slab onto a colored deck unless the deck system uses white cards.
