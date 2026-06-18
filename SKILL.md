@@ -669,6 +669,15 @@ these layout rules protect readability and structural quality.
   and usually makes the design feel stiff. Use a visible line only when it encodes a real
   semantic structure such as an axis, measurement reference, table rule, callout path, or
   reading-order guide that cannot be understood from color/space alone.
+- Register soft grouping fields and divider lines as first-class layout objects. Any
+  alternating row band, soft table stripe, colored section field, image crop boundary, or
+  whitespace grouping field must be registered with
+  `layout_guard.add_soft_grouping_field(...)`. Any visible horizontal/vertical rule,
+  divider, row separator, panel separator, or plot frame stroke must be registered with
+  `layout_guard.add_divider_line(...)` and given a semantic role. Decorative separators
+  or row rules drawn over/along a registered soft grouping field fail the render. If the
+  grouping is already clear from color fields, texture, or spacing, remove the line
+  instead of lowering its opacity.
 - Do not double-frame elements. If a chart mark, illustration fragment, pictogram, object,
   badge, or data shape already has its own outline/stroke, do not place a second outer
   rectangle or border around it merely to contain it. Use internal padding, shadow,
@@ -803,6 +812,11 @@ these layout rules protect readability and structural quality.
   connector dots, track outlines, zero axes, hard edges of ambient blobs, neighboring
   labels, or panel/card edges. When a collision is detected, change the layout system,
   not just the color.
+- Register visible separators in the same guard pass. Soft grouping fields and divider
+  lines must be declared before final `assert_clear()`. A row background/alternating band
+  plus a row divider is allowed only when the divider has a necessary semantic function
+  that color/spacing cannot provide; otherwise `layout_guard.add_divider_line(...)`
+  should make the render fail and the script should remove the divider.
 - Register container boundaries, not only data marks. Row backgrounds, alternating table
   bands, cards, pills, plot panels, summary strips, and soft color fields are still real
   layout containers even when they are pale or borderless. Any text visually placed
