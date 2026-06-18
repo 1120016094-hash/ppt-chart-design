@@ -698,6 +698,13 @@ these layout rules protect readability and structural quality.
   continuous illustration, route, terrain, object, flow, or soft background field can
   group the data clearly, use that instead of boxed cells. If a visible rule is necessary,
   make it light, purposeful, and subordinate to the data, not the dominant visual system.
+- Do not add visible filler shapes. Every visible blob, ellipse, wave, gradient patch,
+  abstract circle, icon container, badge, texture block, or ambient shape must have a
+  declared information role: encode data, group related content, mark a selected value,
+  anchor a label, show sequence/flow, or carry a relevant icon/node. A shape whose only
+  purpose is "make the page less empty" or "match the style" must be removed. If a
+  decorative-looking shape remains, write its role in the construction plan and register
+  it accordingly; otherwise it fails the chart.
 - Do not trace an already clear color-field boundary with an extra hard divider. If two
   background color blocks, texture zones, image crop regions, whitespace bands, or soft
   fields already separate sections, their contrast and spacing are the separator. Adding a
