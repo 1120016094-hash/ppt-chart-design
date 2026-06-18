@@ -803,6 +803,22 @@ these layout rules protect readability and structural quality.
   connector dots, track outlines, zero axes, hard edges of ambient blobs, neighboring
   labels, or panel/card edges. When a collision is detected, change the layout system,
   not just the color.
+- Treat the "approved text background" exception as strictly scoped. A circle, bubble,
+  badge, pill, label background, or colored dot may be allowed to sit behind the text it
+  owns, but that does not make it invisible to the rest of the layout. It must still fit
+  completely inside its declared cell/row/card/module with padding, and it must not cover
+  table headers, row rules, neighboring rows, adjacent labels, other chart marks, or
+  unrelated text. In custom renderers, after drawing an allowed text background, also
+  call `layout_guard.require_inside(...)` against its owning cell/module and keep the
+  owner relationship explicit. Do not register a data mark as `allowed_background` merely
+  to silence a collision error.
+- For matrix, table, and row-based charts, data dots/bubbles must be sized from the cell
+  geometry before they are sized for style. The maximum marker diameter plus stroke and
+  padding must be smaller than the row height and column width allocated to that cell. If
+  a circle large enough to contain text would touch row separators, headers, or adjacent
+  cells, remove the internal text and use an external legend/direct label instead of
+  enlarging the circle. A text-inside-marker design is allowed only when both the marker
+  and the text fit inside the cell's safe area.
 - Register connector anchors, not just connector lines. Any leader line, callout line,
   bracket, arrow, or dot-line must bind to named objects in the render data: a mark
   anchor and a label anchor. Anchors should be computed from the actual drawn geometry
