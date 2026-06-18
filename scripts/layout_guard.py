@@ -140,6 +140,7 @@ class LayoutGuard:
         self.peer_rect_group_requirements: List[
             Tuple[str, List[Rect], str, float, float, float, float, Optional[float], bool]
         ] = []
+        self.boundary_crossing_requirements: List[Tuple[str, List[Rect], str, float, float]] = []
         self.soft_grouping_fields: List[Box] = []
         self.divider_lines: List[Tuple[str, Point, Point, float, str, float]] = []
         self.text_containers: dict[str, Tuple[Rect, float]] = {}
@@ -388,6 +389,28 @@ class LayoutGuard:
             )
         )
 
+    def require_rects_not_cross_boundary(
+        self,
+        name: str,
+        rects: Sequence[Rect],
+        axis: str,
+        coordinate: float,
+        min_gap: float = 0,
+    ) -> None:
+        """Require rects to stay wholly on one side of a visual section boundary.
+
+        Use this for image-crop edges, color-field edges, section breaks, plot edges,
+        and background band boundaries. Text cards, KPI tiles, labels, badges, and
+        repeated modules should not straddle a boundary unless the overlap is an explicit
+        designed tab/bleed and is documented outside this guard.
+        """
+        group = list(rects)
+        if not group:
+            raise ValueError("boundary crossing check requires at least one rect")
+        if axis not in {"x", "y"}:
+            raise ValueError("axis must be 'x' or 'y'")
+        self.boundary_crossing_requirements.append((name, group, axis, float(coordinate), min_gap))
+
     def require_centered_in(
         self,
         name: str,
@@ -489,6 +512,24 @@ class LayoutGuard:
                         f"{name} peer {axis_name} gaps are uneven "
                         f"(min {smallest:.1f}px, max {largest:.1f}px, allowed ratio {max_gap_ratio:.2f})"
                     )
+        for name, rects, axis, coordinate, min_gap in self.boundary_crossing_requirements:
+            for i, rect in enumerate(rects):
+                if axis == "x":
+                    low, high = rect[0], rect[2]
+                else:
+                    low, high = rect[1], rect[3]
+                if low < coordinate < high:
+                    failures.append(
+                        f"{name} rect {i} straddles {axis}={coordinate:.1f} "
+                        f"by {coordinate - low:.1f}px/{high - coordinate:.1f}px"
+                    )
+                else:
+                    distance = min(abs(low - coordinate), abs(high - coordinate))
+                    if distance < min_gap:
+                        failures.append(
+                            f"{name} rect {i} is {distance:.1f}px from {axis}={coordinate:.1f}, "
+                            f"below required boundary gap {min_gap}px"
+                        )
         for container_name, (container_rect, min_padding) in self.text_containers.items():
             for text_box in self.text_boxes:
                 if intersects(text_box.rect, container_rect) and not contains(container_rect, text_box.rect, min_padding):
