@@ -137,6 +137,9 @@ class LayoutGuard:
         self.inline_centerline_requirements: List[Tuple[str, List[Rect], float]] = []
         self.x_alignment_requirements: List[Tuple[str, List[float], float]] = []
         self.rect_clearance_requirements: List[Tuple[str, Rect, Rect, float]] = []
+        self.peer_rect_group_requirements: List[
+            Tuple[str, List[Rect], str, float, float, float, float, Optional[float], bool]
+        ] = []
         self.soft_grouping_fields: List[Box] = []
         self.divider_lines: List[Tuple[str, Point, Point, float, str, float]] = []
         self.text_containers: dict[str, Tuple[Rect, float]] = {}
@@ -347,6 +350,44 @@ class LayoutGuard:
         """
         self.rect_clearance_requirements.append((name, rect_a, rect_b, min_gap))
 
+    def require_peer_rect_group(
+        self,
+        name: str,
+        rects: Sequence[Rect],
+        orientation: str = "horizontal",
+        tolerance_w: float = 2,
+        tolerance_h: float = 2,
+        tolerance_cross_axis: float = 2,
+        min_gap: float = 0,
+        max_gap_ratio: Optional[float] = 0.15,
+        require_equal_gaps: bool = True,
+    ) -> None:
+        """Require peer containers to share one geometry system.
+
+        Use this for card strips, KPI strips, table cell rows, label-card rows, and
+        repeated same-level modules. Highlighting may change color or stroke, but peer
+        containers should keep equal width/height, a shared row/column axis, no overlap,
+        and consistent gutters.
+        """
+        group = list(rects)
+        if len(group) < 2:
+            raise ValueError("peer rect group requires at least two rects")
+        if orientation not in {"horizontal", "vertical"}:
+            raise ValueError("orientation must be 'horizontal' or 'vertical'")
+        self.peer_rect_group_requirements.append(
+            (
+                name,
+                group,
+                orientation,
+                tolerance_w,
+                tolerance_h,
+                tolerance_cross_axis,
+                min_gap,
+                max_gap_ratio,
+                require_equal_gaps,
+            )
+        )
+
     def require_centered_in(
         self,
         name: str,
@@ -388,6 +429,66 @@ class LayoutGuard:
         for name, rect_a, rect_b, min_gap in self.rect_clearance_requirements:
             if not rects_clear(rect_a, rect_b, min_gap):
                 failures.append(f"{name} clearance is below required {min_gap}px")
+        for (
+            name,
+            rects,
+            orientation,
+            tolerance_w,
+            tolerance_h,
+            tolerance_cross_axis,
+            min_gap,
+            max_gap_ratio,
+            require_equal_gaps,
+        ) in self.peer_rect_group_requirements:
+            widths = [r[2] - r[0] for r in rects]
+            heights = [r[3] - r[1] for r in rects]
+            if max(widths) - min(widths) > tolerance_w:
+                failures.append(
+                    f"{name} peer widths differ by {max(widths) - min(widths):.1f}px, "
+                    f"beyond tolerance {tolerance_w}px"
+                )
+            if max(heights) - min(heights) > tolerance_h:
+                failures.append(
+                    f"{name} peer heights differ by {max(heights) - min(heights):.1f}px, "
+                    f"beyond tolerance {tolerance_h}px"
+                )
+            if orientation == "horizontal":
+                top_range = max(r[1] for r in rects) - min(r[1] for r in rects)
+                bottom_range = max(r[3] for r in rects) - min(r[3] for r in rects)
+                if top_range > tolerance_cross_axis or bottom_range > tolerance_cross_axis:
+                    failures.append(
+                        f"{name} peer cards do not share one horizontal baseline "
+                        f"(top range {top_range:.1f}px, bottom range {bottom_range:.1f}px)"
+                    )
+                ordered = sorted(rects, key=lambda r: r[0])
+                gaps = [b[0] - a[2] for a, b in zip(ordered, ordered[1:])]
+                axis_name = "horizontal"
+            else:
+                left_range = max(r[0] for r in rects) - min(r[0] for r in rects)
+                right_range = max(r[2] for r in rects) - min(r[2] for r in rects)
+                if left_range > tolerance_cross_axis or right_range > tolerance_cross_axis:
+                    failures.append(
+                        f"{name} peer cards do not share one vertical baseline "
+                        f"(left range {left_range:.1f}px, right range {right_range:.1f}px)"
+                    )
+                ordered = sorted(rects, key=lambda r: r[1])
+                gaps = [b[1] - a[3] for a, b in zip(ordered, ordered[1:])]
+                axis_name = "vertical"
+            for i, gap in enumerate(gaps):
+                if gap < 0:
+                    failures.append(f"{name} peer {axis_name} gap {i} overlaps by {-gap:.1f}px")
+                elif gap < min_gap:
+                    failures.append(
+                        f"{name} peer {axis_name} gap {i} is {gap:.1f}px, below required {min_gap}px"
+                    )
+            if require_equal_gaps and gaps and all(g >= min_gap for g in gaps):
+                smallest = min(gaps)
+                largest = max(gaps)
+                if max_gap_ratio is not None and smallest > 0 and largest > smallest * (1 + max_gap_ratio):
+                    failures.append(
+                        f"{name} peer {axis_name} gaps are uneven "
+                        f"(min {smallest:.1f}px, max {largest:.1f}px, allowed ratio {max_gap_ratio:.2f})"
+                    )
         for container_name, (container_rect, min_padding) in self.text_containers.items():
             for text_box in self.text_boxes:
                 if intersects(text_box.rect, container_rect) and not contains(container_rect, text_box.rect, min_padding):
