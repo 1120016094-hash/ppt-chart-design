@@ -661,6 +661,14 @@ infographic craft.
 - Backgrounds and details should create context without stealing attention from data.
   Texture, grain, hatches, shadows, borders, overlays, and gradients are acceptable only
   when they match the style, topic, and information hierarchy.
+- Each major region must have one design language. Before rendering, identify the visual
+  language for header, image/illustration field, data-card strip, source/footer, and any
+  annotation layer: typography-only, soft card, table band, image-integrated callout,
+  stamp/seal, or chart mark. Elements inside the same region should share the same
+  surface model, corner logic, stroke weight, tint, shadow, spacing, and typographic
+  rhythm. Do not place an isolated badge, seal, pill, or mini-card in a region whose
+  other elements are plain text or image field unless that element is the intentional
+  focal device and is not duplicated elsewhere.
 - Memorability must serve comprehension. One strong visual decision is welcome; several
   unrelated decorative tricks are not. If a flourish makes comparison, reading order, or
   data accuracy weaker, remove it.
@@ -1116,6 +1124,13 @@ these layout rules protect readability and structural quality.
 - Avoid edge-hugging badges. Pills, group labels, stamps, and callouts need space from
   nearby panel edges and neighboring labels. If a badge marks a group of rows, align it
   to the group's vertical center or start line in a separate margin lane.
+- Avoid orphan badges and foreign mini-cards. A badge, stamp, pill, seal, or small
+  rounded card must belong to the region it sits in. If the header region is typography
+  only, use an inline utility label, small text note, underline, or color accent instead
+  of a bordered stamp. If the data-card strip already highlights the focal item, do not
+  add a second detached badge repeating the same emphasis. If a badge is necessary, make
+  it share the region's card family, stroke weight, radius, tint, and alignment spine, or
+  move the information into the existing focal card/annotation.
 - Stamps, seals, badges, and circular labels are real text containers, not decorative
   leftovers. Their internal text must use a measured text-stack contract just like a card
   or row module: line order, font sizes, line heights, gaps, center/alignment, and an
@@ -1391,6 +1406,11 @@ Reject and re-plan before rendering if any of these patterns appear:
   underline even though the corresponding data mark sits elsewhere in the image. This
   breaks the label-to-mark relationship; redesign the label placement or route the
   connector through reserved negative space instead.
+- A region contains an orphan badge, stamp, pill, seal, or mini-card whose surface,
+  border, radius, tint, or typography does not match that region's language. Examples:
+  a bordered stamp floating in a typography-only header, a soft card sitting on top of an
+  image field without attachment to a data mark, or a second detached emphasis badge
+  repeating a value already highlighted in the title or focal card.
 - A group of peer leader lines has unaligned starts/ends, irregular endpoint dot sizes, or
   arbitrary diagonal/zigzag paths when a shared connector lane would make the annotation
   system clearer.
@@ -1566,6 +1586,11 @@ We extract **design approach and style, never content**:
       of view, confident typography/color/spatial rhythm, and topic-appropriate background
       details. It does not feel like a default dashboard, generic AI template, or random
       decoration pasted over data.
+- [ ] Regional design language verified. Header, image/illustration field, data-card
+      strip, source/footer, and annotation layer each use a consistent surface model,
+      corner logic, stroke weight, tint, spacing, and typography. No orphan badge, stamp,
+      pill, seal, or mini-card appears in a region where it does not belong; repeated
+      emphasis has been merged into the existing focal title, card, or annotation.
 - [ ] A data-art integration concept was defined before image generation for upgrade
       styles. It states the data theme, visual metaphor, each illustration's data role,
       the reserved zones for exact numbers/text, and why the art helps the viewer
