@@ -224,6 +224,13 @@ When inheriting a PPT background, adapt the chart safely:
    decision: intent (comparison / trend / composition / KPI / table / deviation /
    flow / distribution / relationship / geo) -> then data shape (how many categories /
    series / time). Pick the leaf recommendation. Never choose by what looks familiar.
+   A single chart may have only one independent coordinate system. When the data contains
+   two measures with different units or scales, choose the primary measure for the plotted
+   axis and express the secondary measure as direct labels, annotations, color/size
+   emphasis, selected callouts, a compact non-axis tag row, or a separate chart requested
+   by the user. Do not add a second plot frame, second baseline, second y-scale, inset
+   sparkline, or lower mini-chart inside the same chart merely because the second measure
+   is useful context.
 
 4. **Resolve background context.** Before style confirmation/rendering, check whether the
    request is part of a PPT workflow or includes upstream deck/background planning. If so,
@@ -833,6 +840,19 @@ these layout rules protect readability and structural quality.
   direct-label lane. If values are inside marks, they must pass the label-fit check; if
   the mark is too short or too narrow, move the value outside instead of shrinking it
   below legible size.
+- Use only one independent coordinate system per chart. Register the main plotted
+  coordinate system with `layout_guard.add_axis_system(...)`. A chart may have one x/y
+  plotting system, with one primary y metric and one reading rhythm. Secondary measures
+  with different units may share the primary x positions as annotations, chips, color
+  emphasis, endpoint labels, or a small non-axis note row, but they must not form their
+  own plotted coordinate system. A lower sparkline, mini bar chart, second baseline,
+  second y-scale, inset axis, or dual-axis overlay counts as a second independent
+  coordinate system and fails unless the user explicitly asked for multiple separate
+  charts.
+- If a second metric truly needs its own axis, split the output into two separate charts
+  or two clearly separated pages/PNGs, each with one independent coordinate system.
+  Within one infographic, do not make a primary chart plus an embedded mini chart simply
+  to keep everything on one canvas; use direct labels or selected callouts instead.
 - For diverging bars, reserve four lanes before drawing: category labels, negative value
   labels, the bar plot area with the zero axis, and positive value labels. Measure the
   longest category label and the widest negative value label first; add a visible gutter
@@ -1417,6 +1437,11 @@ Reject and re-plan before rendering if any of these patterns appear:
 - A row-based chart places the left label/value block, middle connector, and right data
   mark on different vertical anchors for the same data item, so the row reads as three
   misregistered layers instead of one aligned item.
+- A single chart contains more than one independent coordinate system. Examples include
+  a primary line chart plus a lower sparkline with its own baseline, a bar chart plus an
+  embedded mini line chart, a dual-axis line chart with two y-scales, or an inset chart
+  that uses a separate scale. Secondary metrics must become annotations, chips, labels,
+  color/size emphasis, selected callouts, or a separate requested chart.
 - A data label module has no measured text-stack contract, causing role collisions such
   as name over English caption, English caption over number, unit too close to digits, or
   metadata sitting on the same baseline without a gutter. This is a frontend-design
@@ -1574,6 +1599,11 @@ We extract **design approach and style, never content**:
 - [ ] Color encodes meaning consistently (recency/ownership); same highlight + sort order
       reused across all charts in this request.
 - [ ] Chart type matches the intent + data shape (per chart-selection).
+- [ ] Single-axis rule verified: the chart contains at most one independent coordinate
+      system. Any secondary metric is shown as annotation/chips/direct labels/callouts or
+      split into a separate chart, not as a second baseline, second scale, inset sparkline,
+      lower mini-chart, or dual-axis overlay. Custom renderers registered the primary
+      system with `layout_guard.add_axis_system(...)`.
 - [ ] The whole page reads as one coherent information design: visual hierarchy,
       grouping, chart types, annotation, and illustration all support the same message.
       Data remains primary; illustration does not dominate unless it is itself the chart.
