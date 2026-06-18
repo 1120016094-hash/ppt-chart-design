@@ -826,6 +826,15 @@ these layout rules protect readability and structural quality.
   without checking their union bbox against the band. If the text touches or crosses the
   rounded corner, row edge, panel boundary, or table boundary, the render fails even when
   the text does not overlap a chart mark.
+- Soft grouping is not enough for text-bearing fields. If a row band, table header,
+  badge, pill, label cell, value cell, or summary strip contains readable text, register
+  it as a text container with `layout_guard.add_text_container(...)`, then bind the
+  measured text bbox or text-stack union with
+  `layout_guard.require_text_stack_inside_container(...)`. A field registered only with
+  `add_soft_grouping_field(...)` is treated as a visual grouping field, not as proof that
+  its text has safe padding. Table headers and pills must be checked cell by cell, not
+  only against the full header band, because text can touch the bottom/side of one cell
+  even when the whole band looks large enough.
 - Container checks must include neighboring containers and neighboring text stacks. It is
   not enough for a row band/card to contain its own text; that band/card must also stay
   out of the previous and next rows' readable text safe areas. For alternating table
