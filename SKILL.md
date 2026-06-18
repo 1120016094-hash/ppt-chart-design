@@ -708,6 +708,14 @@ these layout rules protect readability and structural quality.
   field with padding, or fully outside it with a clear gutter. In custom renderers, use
   `layout_guard.require_rects_not_cross_boundary(...)` or an equivalent assertion for
   every relevant field edge.
+- Boundary protection applies to **all readable text**, not only boxed cards. Header
+  labels, titles, subtitles, source notes, captions, units, footnotes, stamps, and loose
+  annotations can also cross a color/image boundary even when their parent container fits.
+  After all readable text is registered, run
+  `layout_guard.require_all_text_not_cross_boundary(...)` or an equivalent assertion
+  against major image/color/section field edges. A subtitle or source note that overlaps
+  a field by a few pixels still fails; move the field, wrap/shorten the copy, reduce the
+  text role, or reserve a separate text lane.
 - Do not mix manually fixed overlay coordinates with dynamic image crop geometry. If an
   overlay card, callout, or label belongs to a generated image field, derive its allowed
   y/x range from the image field's final pasted rectangle. If the crop, scale, or canvas
@@ -1334,6 +1342,11 @@ Reject and re-plan before rendering if any of these patterns appear:
   field. The container must be fully inside one field or fully outside with a gutter;
   riding across the boundary makes the layout look accidentally intersected and must be
   reflowed.
+- Any loose readable text line straddles or kisses a visible image/color/section
+  boundary. This includes titles, subtitles, captions, source notes, units, stamps, and
+  annotations that are not inside a card. A parent title zone passing its own container
+  check does not excuse a subtitle whose final rendered bbox crosses into the image
+  field.
 - A timeline or multi-point dataset is split into many isolated mini-scenes before
   testing a continuous data illustration that expresses the whole change across the page.
 - An outlined chart mark, illustrated object, pictogram, or data shape is placed inside an
@@ -1599,6 +1612,10 @@ We extract **design approach and style, never content**:
       registered. Text-bearing cards, KPI tiles, label boxes, badges, pills, and table
       cells sit fully inside one field or fully outside it with a clear gutter; none
       straddles a field edge after crop/scale/placement.
+- [ ] Loose text boundary safety verified. Titles, subtitles, captions, source notes,
+      units, stamps, and annotations have measured final bboxes and do not straddle or
+      kiss image/color/section boundaries. Major field edges were checked against all
+      registered text, not only against cards or text containers.
 - [ ] No double-frame effect is present. An element with its own outline/stroke is not
       wrapped in another border with the same containment role; any outer frame has a
       distinct semantic purpose such as highlight, selection, or warning.
