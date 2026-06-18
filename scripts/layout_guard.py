@@ -104,6 +104,10 @@ def rects_clear(a: Rect, b: Rect, min_gap: float = 0) -> bool:
     return not intersects(expand_rect(a, min_gap), b)
 
 
+def _interval_overlap(a0: float, a1: float, b0: float, b1: float) -> float:
+    return max(0.0, min(a1, b1) - max(a0, b0))
+
+
 def point_rect_distance(point: Point, rect: Rect) -> float:
     x, y = point
     x0, y0, x1, y1 = rect
@@ -133,6 +137,8 @@ class LayoutGuard:
         self.inline_centerline_requirements: List[Tuple[str, List[Rect], float]] = []
         self.x_alignment_requirements: List[Tuple[str, List[float], float]] = []
         self.rect_clearance_requirements: List[Tuple[str, Rect, Rect, float]] = []
+        self.soft_grouping_fields: List[Box] = []
+        self.divider_lines: List[Tuple[str, Point, Point, float, str, float]] = []
 
     def add_text_box(self, name: str, rect: Rect, pad: Optional[float] = None) -> Box:
         box = Box("text", name, rect, "text").padded(self.default_gap if pad is None else pad)
@@ -159,6 +165,39 @@ class LayoutGuard:
         box = Box("no_cross", name, rect, "no_cross").padded(pad)
         self.no_cross_boxes.append(box)
         return box
+
+    def add_soft_grouping_field(self, name: str, rect: Rect, pad: float = 0) -> Box:
+        """Register a soft color/texture/whitespace field that already separates content.
+
+        Use this for alternating row bands, soft section fields, image crop regions, and
+        pale module backgrounds. Decorative separator lines drawn across or along these
+        fields are treated as redundant unless the line has a distinct semantic role.
+        """
+        box = Box("soft_grouping_field", name, rect, "soft_grouping_field").padded(pad)
+        self.soft_grouping_fields.append(box)
+        return box
+
+    def add_divider_line(
+        self,
+        name: str,
+        start: Point,
+        end: Point,
+        width: float = 1,
+        semantic_role: str = "decorative",
+        boundary_tolerance: float = 6,
+    ) -> Box:
+        """Register a visible divider/rule line for redundancy checks.
+
+        ``semantic_role`` should describe why the line exists. Roles such as ``axis``,
+        ``zero_axis``, ``benchmark``, ``threshold``, ``measurement_reference``, and
+        ``connector`` are allowed to cross soft fields. Decorative row rules, panel
+        dividers, and separator strokes are rejected when a registered soft field already
+        provides the grouping.
+        """
+        p0 = (float(start[0]), float(start[1]))
+        p1 = (float(end[0]), float(end[1]))
+        self.divider_lines.append((name, p0, p1, width, semantic_role, boundary_tolerance))
+        return Box("divider_line", name, rect_from_points([p0, p1], width / 2), semantic_role)
 
     def add_connector_path(self, name: str, points: Sequence[Point], width: float = 2, pad: float = 6) -> Box:
         """Register a leader/callout path so it can be checked against text and subjects."""
@@ -342,6 +381,51 @@ class LayoutGuard:
                         failures.append(
                             f"{name} x lane {i} offset is {x - target:.1f}px, "
                             f"beyond tolerance {tolerance_x}px"
+                        )
+        semantic_line_roles = {
+            "axis",
+            "zero_axis",
+            "benchmark",
+            "threshold",
+            "measurement_reference",
+            "callout",
+            "connector",
+            "leader",
+            "semantic",
+        }
+        for line_name, start, end, width, semantic_role, tolerance in self.divider_lines:
+            if semantic_role in semantic_line_roles:
+                continue
+            x0, y0 = start
+            x1, y1 = end
+            is_horizontal = abs(y0 - y1) <= max(1.0, width)
+            is_vertical = abs(x0 - x1) <= max(1.0, width)
+            if not is_horizontal and not is_vertical:
+                continue
+            line_length = math.hypot(x1 - x0, y1 - y0)
+            if line_length <= 0:
+                continue
+            for field in self.soft_grouping_fields:
+                fx0, fy0, fx1, fy1 = field.rect
+                if is_horizontal:
+                    lx0, lx1 = sorted((x0, x1))
+                    overlap = _interval_overlap(lx0, lx1, fx0, fx1)
+                    enough_overlap = overlap >= min(line_length, fx1 - fx0) * 0.45
+                    line_y = (y0 + y1) / 2
+                    crosses_field = fy0 - tolerance <= line_y <= fy1 + tolerance
+                    if enough_overlap and crosses_field:
+                        failures.append(
+                            f"{line_name} is a redundant horizontal divider over soft grouping field {field.name}"
+                        )
+                if is_vertical:
+                    ly0, ly1 = sorted((y0, y1))
+                    overlap = _interval_overlap(ly0, ly1, fy0, fy1)
+                    enough_overlap = overlap >= min(line_length, fy1 - fy0) * 0.45
+                    line_x = (x0 + x1) / 2
+                    crosses_field = fx0 - tolerance <= line_x <= fx1 + tolerance
+                    if enough_overlap and crosses_field:
+                        failures.append(
+                            f"{line_name} is a redundant vertical divider over soft grouping field {field.name}"
                         )
         forbidden = [*self.graphic_boxes, *extra_forbidden]
         for text_box in self.text_boxes:
