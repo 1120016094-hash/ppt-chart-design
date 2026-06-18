@@ -835,6 +835,11 @@ these layout rules protect readability and structural quality.
   its text has safe padding. Table headers and pills must be checked cell by cell, not
   only against the full header band, because text can touch the bottom/side of one cell
   even when the whole band looks large enough.
+  `layout_guard.assert_clear()` also auto-checks any registered text box that intersects
+  a registered text container, so unbound text inside a text container still fails if it
+  violates the declared padding. This automatic check is the backstop; explicit
+  `require_text_stack_inside_container(...)` remains required for multi-line text stacks
+  because it checks the group as one typographic block.
 - Container checks must include neighboring containers and neighboring text stacks. It is
   not enough for a row band/card to contain its own text; that band/card must also stay
   out of the previous and next rows' readable text safe areas. For alternating table
