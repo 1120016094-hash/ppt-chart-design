@@ -142,6 +142,7 @@ class LayoutGuard:
         ] = []
         self.boundary_crossing_requirements: List[Tuple[str, List[Rect], str, float, float]] = []
         self.text_boundary_requirements: List[Tuple[str, str, float, float]] = []
+        self.axis_systems: List[Tuple[str, Rect, str, str, bool]] = []
         self.soft_grouping_fields: List[Box] = []
         self.divider_lines: List[Tuple[str, Point, Point, float, str, float]] = []
         self.text_containers: dict[str, Tuple[Rect, float]] = {}
@@ -429,6 +430,23 @@ class LayoutGuard:
             raise ValueError("axis must be 'x' or 'y'")
         self.text_boundary_requirements.append((name, axis, float(coordinate), min_gap))
 
+    def add_axis_system(
+        self,
+        name: str,
+        plot_rect: Rect,
+        x_metric: str,
+        y_metric: str,
+        independent: bool = True,
+    ) -> None:
+        """Declare a chart coordinate system.
+
+        A single infographic chart should normally have only one independent coordinate
+        system. Secondary metrics may share the primary x-axis as annotations, labels, or
+        non-axis encodings, but should not create a second independent plot frame,
+        baseline, scale, or sparkline unless the output is explicitly a multi-chart page.
+        """
+        self.axis_systems.append((name, plot_rect, x_metric, y_metric, independent))
+
     def require_centered_in(
         self,
         name: str,
@@ -456,6 +474,10 @@ class LayoutGuard:
 
     def assert_clear(self, extra_forbidden: Sequence[Box] = ()) -> None:
         failures = []
+        independent_axes = [axis for axis in self.axis_systems if axis[4]]
+        if len(independent_axes) > 1:
+            names = ", ".join(axis[0] for axis in independent_axes)
+            failures.append(f"multiple independent coordinate systems are registered: {names}")
         for name, outer, inner, pad in self.required_zones:
             if not contains(outer, inner, pad):
                 failures.append(f"{name} overflows reserved zone")
