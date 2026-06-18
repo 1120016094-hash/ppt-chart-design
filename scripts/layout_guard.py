@@ -99,6 +99,11 @@ def expand_rect(rect: Rect, pad: float) -> Rect:
     return (x0 - pad, y0 - pad, x1 + pad, y1 + pad)
 
 
+def rects_clear(a: Rect, b: Rect, min_gap: float = 0) -> bool:
+    """Return True when two rects do not touch and keep a minimum clear gap."""
+    return not intersects(expand_rect(a, min_gap), b)
+
+
 def point_rect_distance(point: Point, rect: Rect) -> float:
     x, y = point
     x0, y0, x1, y1 = rect
@@ -127,6 +132,7 @@ class LayoutGuard:
         self.centering_requirements: List[Tuple[str, Rect, Rect, float, float]] = []
         self.inline_centerline_requirements: List[Tuple[str, List[Rect], float]] = []
         self.x_alignment_requirements: List[Tuple[str, List[float], float]] = []
+        self.rect_clearance_requirements: List[Tuple[str, Rect, Rect, float]] = []
 
     def add_text_box(self, name: str, rect: Rect, pad: Optional[float] = None) -> Box:
         box = Box("text", name, rect, "text").padded(self.default_gap if pad is None else pad)
@@ -258,6 +264,15 @@ class LayoutGuard:
         """Require measured vertical breathing room between two stacked text blocks."""
         self.vertical_gap_requirements.append((name, upper_rect, lower_rect, min_gap))
 
+    def require_rect_clearance(self, name: str, rect_a: Rect, rect_b: Rect, min_gap: float = 0) -> None:
+        """Require two arbitrary rects to stay apart by a minimum clear gap.
+
+        Use this for neighboring row backgrounds, card surfaces, value cells, text stacks,
+        and soft color bands that should not touch even when they do not overlap a chart
+        mark. This catches edge-kissing between pale containers and adjacent text.
+        """
+        self.rect_clearance_requirements.append((name, rect_a, rect_b, min_gap))
+
     def require_centered_in(
         self,
         name: str,
@@ -296,6 +311,9 @@ class LayoutGuard:
             gap = lower_rect[1] - upper_rect[3]
             if gap < min_gap:
                 failures.append(f"{name} vertical gap is {gap:.1f}px, below required {min_gap}px")
+        for name, rect_a, rect_b, min_gap in self.rect_clearance_requirements:
+            if not rects_clear(rect_a, rect_b, min_gap):
+                failures.append(f"{name} clearance is below required {min_gap}px")
         for name, container_rect, item_rect, tolerance_x, tolerance_y in self.centering_requirements:
             cx = (container_rect[0] + container_rect[2]) / 2
             cy = (container_rect[1] + container_rect[3]) / 2
