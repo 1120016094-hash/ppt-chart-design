@@ -174,15 +174,26 @@ class LayoutGuard:
         self.no_cross_boxes.append(box)
         return box
 
-    def add_soft_grouping_field(self, name: str, rect: Rect, pad: float = 0) -> Box:
+    def add_soft_grouping_field(
+        self,
+        name: str,
+        rect: Rect,
+        pad: float = 0,
+        reads_as_data_frame: bool = False,
+    ) -> Box:
         """Register a soft color/texture/whitespace field that already separates content.
 
         Use this for alternating row bands, soft section fields, image crop regions, and
         pale module backgrounds. Decorative separator lines drawn across or along these
         fields are treated as redundant unless the line has a distinct semantic role.
+        If the field visually reads as a rounded card, bordered cell, white panel,
+        raised surface, or data-containing frame, set ``reads_as_data_frame=True`` so
+        nested data-frame checks still apply.
         """
         box = Box("soft_grouping_field", name, rect, "soft_grouping_field").padded(pad)
         self.soft_grouping_fields.append(box)
+        if reads_as_data_frame:
+            self.data_frames.append(Box("data_frame", name, rect, "data_frame").padded(pad))
         return box
 
     def add_data_frame(self, name: str, rect: Rect, pad: float = 0) -> Box:
