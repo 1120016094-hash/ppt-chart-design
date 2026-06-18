@@ -140,6 +140,13 @@ When inheriting a PPT background, adapt the chart safely:
    may get larger modules or richer encodings, while detail/context metrics should be
    smaller or nested. Do not mix different module structures merely because one block has
    more text; first decide whether the data are peers or different levels.
+   Same-level peer containers must also use one measurable geometry system. For card
+   strips, KPI strips, table rows, label-card rows, and peer modules, declare the peer
+   group before rendering and verify equal width/height, shared top/bottom or left/right
+   axis, no overlap, minimum gutter, and near-equal gaps. A highlighted peer card may
+   change fill, stroke, shadow, or emphasis, but it must not quietly change size, baseline,
+   padding model, or spacing unless the hierarchy change is intentional and visibly
+   explained.
    Assign every label, formula, note, and annotation to a **semantic owner module** before
    positioning it. A text item that explains a parent/summary value must live in the
    parent/summary territory, not underneath one child component merely because there is
@@ -706,6 +713,19 @@ these layout rules protect readability and structural quality.
   must have a gutter large enough to read as deliberate separation. As a default, the
   gutter should be at least the body-text line height or 2% of canvas width, whichever is
   larger. Panel edges must not visually kiss each other.
+- Register same-level repeated containers as peer groups. Any horizontal or vertical set
+  of cards, KPI tiles, label boxes, table cells, small multiples, row modules, or repeated
+  visual containers that represents the same analytical level must be passed to
+  `layout_guard.require_peer_rect_group(...)` or an equivalent assertion before output.
+  This check must verify equal width/height, shared row or column baseline, no overlap,
+  a declared minimum gutter, and near-equal spacing. Do not accept a row of peer cards
+  because individual text fits; the group itself must read as one deliberate system.
+- Do not hand-place peer card centers independently. Compute peer container positions
+  from one grid formula: available span, item count, item width/height, and gutter. If the
+  available span cannot fit the planned card width plus gutters, reduce the card width,
+  reduce copy, split into two rows, or choose a different layout. Never solve the last
+  item by nudging its center manually, because this creates the exact uneven/overlapping
+  failure the peer-group check is meant to catch.
 - Internal padding must scale with the container. Text inside cards, plot panels, boxed
   notes, badges, and pills needs balanced padding on every side. As a default, use at
   least 1.2x body-text line height for panel padding and at least 0.6x label line height
@@ -1560,6 +1580,11 @@ We extract **design approach and style, never content**:
 - [ ] All repeated data containers use one consistent geometry system: same frame style,
       baseline, padding logic, title/value/supporting-copy order, and chart grammar unless
       a deliberate hierarchy change is visible and justified.
+- [ ] Repeated peer containers passed a coded peer-group geometry check. Card strips,
+      KPI tiles, label-card rows, table cells, and row modules have equal width/height,
+      a shared row or column axis, no overlap, a declared minimum gutter, and near-equal
+      spacing. Any highlighted peer keeps the same geometry unless the hierarchy change
+      is intentional and documented.
 - [ ] Information hierarchy verified before layout: metrics at the same analytical level
       use the same module size, element set, chart grammar, type scale, and spacing.
       Metrics at different levels are intentionally scaled or nested according to their
