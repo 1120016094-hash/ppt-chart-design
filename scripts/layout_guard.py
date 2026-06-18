@@ -143,6 +143,7 @@ class LayoutGuard:
         self.boundary_crossing_requirements: List[Tuple[str, List[Rect], str, float, float]] = []
         self.text_boundary_requirements: List[Tuple[str, str, float, float]] = []
         self.axis_systems: List[Tuple[str, Rect, str, str, bool]] = []
+        self.data_frames: List[Box] = []
         self.soft_grouping_fields: List[Box] = []
         self.divider_lines: List[Tuple[str, Point, Point, float, str, float]] = []
         self.text_containers: dict[str, Tuple[Rect, float]] = {}
@@ -182,6 +183,19 @@ class LayoutGuard:
         """
         box = Box("soft_grouping_field", name, rect, "soft_grouping_field").padded(pad)
         self.soft_grouping_fields.append(box)
+        return box
+
+    def add_data_frame(self, name: str, rect: Rect, pad: float = 0) -> Box:
+        """Register a visible data-bearing frame/card/cell surface.
+
+        Use this for any visible rounded rectangle, bordered cell, KPI card, data pill,
+        label-value box, mini table cell, or row card whose purpose is to contain a
+        metric, category, value, year, label-value pair, or chart datum. Data frames are
+        not allowed to nest inside other data frames; use a soft grouping field for the
+        parent region or make peer items share one surface instead.
+        """
+        box = Box("data_frame", name, rect, "data_frame").padded(pad)
+        self.data_frames.append(box)
         return box
 
     def add_text_container(
@@ -478,6 +492,12 @@ class LayoutGuard:
         if len(independent_axes) > 1:
             names = ", ".join(axis[0] for axis in independent_axes)
             failures.append(f"multiple independent coordinate systems are registered: {names}")
+        for outer in self.data_frames:
+            for inner in self.data_frames:
+                if outer is inner:
+                    continue
+                if contains(outer.rect, inner.rect, 0):
+                    failures.append(f"data frame {inner.name} is nested inside data frame {outer.name}")
         for name, outer, inner, pad in self.required_zones:
             if not contains(outer, inner, pad):
                 failures.append(f"{name} overflows reserved zone")
