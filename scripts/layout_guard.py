@@ -139,6 +139,7 @@ class LayoutGuard:
         self.rect_clearance_requirements: List[Tuple[str, Rect, Rect, float]] = []
         self.soft_grouping_fields: List[Box] = []
         self.divider_lines: List[Tuple[str, Point, Point, float, str, float]] = []
+        self.text_containers: dict[str, Tuple[Rect, float]] = {}
 
     def add_text_box(self, name: str, rect: Rect, pad: Optional[float] = None) -> Box:
         box = Box("text", name, rect, "text").padded(self.default_gap if pad is None else pad)
@@ -176,6 +177,40 @@ class LayoutGuard:
         box = Box("soft_grouping_field", name, rect, "soft_grouping_field").padded(pad)
         self.soft_grouping_fields.append(box)
         return box
+
+    def add_text_container(
+        self,
+        name: str,
+        rect: Rect,
+        min_padding: float,
+        soft_grouping: bool = True,
+    ) -> Box:
+        """Register a container that owns readable text.
+
+        Unlike a soft grouping field, this creates an explicit text-safe area. Renderers
+        should pair it with ``require_text_stack_inside_container`` for every header,
+        row label, value cell, badge, pill, or table cell that contains readable text.
+        """
+        self.text_containers[name] = (rect, min_padding)
+        if soft_grouping:
+            return self.add_soft_grouping_field(name, rect)
+        return Box("text_container", name, rect, "text_container")
+
+    def require_text_stack_inside_container(
+        self,
+        name: str,
+        container_name: str,
+        text_rects: Sequence[Rect],
+        pad: Optional[float] = None,
+    ) -> None:
+        """Require a measured group of text boxes to stay inside an owned container."""
+        if container_name not in self.text_containers:
+            raise ValueError(f"unknown text container: {container_name}")
+        rects = list(text_rects)
+        if not rects:
+            raise ValueError("text stack requires at least one rect")
+        container_rect, default_pad = self.text_containers[container_name]
+        self.require_inside(name, container_rect, union_rect(rects), default_pad if pad is None else pad)
 
     def add_divider_line(
         self,
