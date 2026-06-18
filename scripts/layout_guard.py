@@ -388,6 +388,13 @@ class LayoutGuard:
         for name, rect_a, rect_b, min_gap in self.rect_clearance_requirements:
             if not rects_clear(rect_a, rect_b, min_gap):
                 failures.append(f"{name} clearance is below required {min_gap}px")
+        for container_name, (container_rect, min_padding) in self.text_containers.items():
+            for text_box in self.text_boxes:
+                if intersects(text_box.rect, container_rect) and not contains(container_rect, text_box.rect, min_padding):
+                    failures.append(
+                        f"{text_box.name} is inside text container {container_name} "
+                        f"without required {min_padding}px padding"
+                    )
         for name, container_rect, item_rect, tolerance_x, tolerance_y in self.centering_requirements:
             cx = (container_rect[0] + container_rect[2]) / 2
             cy = (container_rect[1] + container_rect[3]) / 2
