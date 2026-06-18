@@ -812,6 +812,15 @@ these layout rules protect readability and structural quality.
   without checking their union bbox against the band. If the text touches or crosses the
   rounded corner, row edge, panel boundary, or table boundary, the render fails even when
   the text does not overlap a chart mark.
+- Container checks must include neighboring containers and neighboring text stacks. It is
+  not enough for a row band/card to contain its own text; that band/card must also stay
+  out of the previous and next rows' readable text safe areas. For alternating table
+  bands, row backgrounds, and grouped color fields, measure every row's text stack and
+  every background band, then verify a minimum vertical/horizontal gap between each band
+  and all non-owned text stacks. If a band's rounded corner, fill edge, or table boundary
+  touches the previous row's note or the next row's value, shrink the band, increase row
+  spacing, move the text stack, or remove the band. Do not accept a render because the
+  band is pale or because the text remains technically readable.
 - Value columns and note columns need declared cells. Outside value labels, right-side
   notes, remarks, units, and metadata must be placed inside a reserved value/note cell
   with measured left/right/top/bottom padding. The renderer must check the union bbox of
