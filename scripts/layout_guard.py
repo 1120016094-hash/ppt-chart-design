@@ -141,6 +141,7 @@ class LayoutGuard:
             Tuple[str, List[Rect], str, float, float, float, float, Optional[float], bool]
         ] = []
         self.boundary_crossing_requirements: List[Tuple[str, List[Rect], str, float, float]] = []
+        self.text_boundary_requirements: List[Tuple[str, str, float, float]] = []
         self.soft_grouping_fields: List[Box] = []
         self.divider_lines: List[Tuple[str, Point, Point, float, str, float]] = []
         self.text_containers: dict[str, Tuple[Rect, float]] = {}
@@ -411,6 +412,23 @@ class LayoutGuard:
             raise ValueError("axis must be 'x' or 'y'")
         self.boundary_crossing_requirements.append((name, group, axis, float(coordinate), min_gap))
 
+    def require_all_text_not_cross_boundary(
+        self,
+        name: str,
+        axis: str,
+        coordinate: float,
+        min_gap: float = 0,
+    ) -> None:
+        """Require every registered readable text box to avoid a visual boundary.
+
+        Use this for major image/color/section field edges after the final field bounds
+        are known. It catches title, subtitle, source, note, and label text that is not
+        inside a card but still crosses or kisses a visible color/image boundary.
+        """
+        if axis not in {"x", "y"}:
+            raise ValueError("axis must be 'x' or 'y'")
+        self.text_boundary_requirements.append((name, axis, float(coordinate), min_gap))
+
     def require_centered_in(
         self,
         name: str,
@@ -528,6 +546,24 @@ class LayoutGuard:
                     if distance < min_gap:
                         failures.append(
                             f"{name} rect {i} is {distance:.1f}px from {axis}={coordinate:.1f}, "
+                            f"below required boundary gap {min_gap}px"
+                        )
+        for name, axis, coordinate, min_gap in self.text_boundary_requirements:
+            for text_box in self.text_boxes:
+                if axis == "x":
+                    low, high = text_box.rect[0], text_box.rect[2]
+                else:
+                    low, high = text_box.rect[1], text_box.rect[3]
+                if low < coordinate < high:
+                    failures.append(
+                        f"{text_box.name} straddles {name} {axis}={coordinate:.1f} "
+                        f"by {coordinate - low:.1f}px/{high - coordinate:.1f}px"
+                    )
+                else:
+                    distance = min(abs(low - coordinate), abs(high - coordinate))
+                    if distance < min_gap:
+                        failures.append(
+                            f"{text_box.name} is {distance:.1f}px from {name} {axis}={coordinate:.1f}, "
                             f"below required boundary gap {min_gap}px"
                         )
         for container_name, (container_rect, min_padding) in self.text_containers.items():
