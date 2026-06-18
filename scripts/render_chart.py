@@ -4,8 +4,11 @@
 This is a STARTER. It themes matplotlib from the style tokens and ships demo
 renderers for bar / line / donut. Extend with more chart types and, for styles
 whose token illustration.mode == "generate", composite generated illustrations
-on top (see SKILL.md). Output is a high-DPI PNG/SVG meant to be inserted into a
-slide as a picture (high-fidelity image mode).
+on top (see SKILL.md). Default skill output is PNG-only: one complete annotated
+PNG and one clean PNG that removes only readable text/numbers while preserving
+non-text visuals and data-bearing marks. This starter script renders a single PNG per
+call; orchestration code should call/render twice or hide annotations for the clean
+version.
 
 Usage:
     python render_chart.py --style style_1_airy_systematic --chart bar --out out.png

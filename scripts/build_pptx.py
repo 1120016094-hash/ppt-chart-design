@@ -1,9 +1,13 @@
 #!/usr/bin/env python3
-"""Place rendered chart image(s) onto a 16:9 PPTX slide (high-fidelity image mode).
+"""Legacy optional helper: place rendered chart image(s) onto a 16:9 PPTX slide.
+
+The skill's default output is PNG-only: one complete annotated PNG and one clean PNG
+that removes only readable text/numbers while preserving non-text visuals and
+data-bearing marks. Use this helper only when the user explicitly asks for PPTX export.
 
 The chart is inserted as a picture - pixel-faithful to the design, not an editable
-native PPT chart. Background can be set to match the style (e.g. full-bleed colored
-page for Style 5).
+native PPT chart. Background can be set to match the inherited PPT/deck background or
+style fallback.
 
 Usage:
     python build_pptx.py --image chart.png --out deck.pptx

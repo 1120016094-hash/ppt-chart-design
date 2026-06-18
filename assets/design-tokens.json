@@ -2,8 +2,9 @@
   "_meta": {
     "purpose": "Canonical palette / typography / illustration tokens for 5 chart-design styles. Hex values were sampled from reference works pixel-by-pixel. Render scripts and style references read from this file.",
     "fonts_note": "Each style lists the original (often commercial) font plus a free fallback. Render scripts should try the listed family and fall back to a generic sans/serif if unavailable.",
-    "output_mode": "high_fidelity_image",
-    "comment_output": "Charts are rendered to PNG/SVG at high DPI and inserted into PPTX as pictures (not native editable charts). See scripts/."
+    "output_mode": "png_complete_and_clean",
+    "comment_output": "Charts are rendered as two high-DPI PNGs by default: a complete annotated version and a clean version that removes only readable text/numbers while preserving non-text visuals and data-bearing marks. PPTX output is legacy/optional only when explicitly requested.",
+    "background_policy": "Style background tokens are fallback defaults. If an upstream PPT/deck workflow supplies a background plan, inherit that background and adapt contrast, shadows, neutrals, and image prompts accordingly."
   },
 
   "style_1_airy_systematic": {
@@ -37,7 +38,7 @@
     "fonts": {"title": ["Anton", "Archivo Black", "Oswald", "sans-serif"], "body": ["Inter", "Archivo", "sans-serif"]},
     "type_rules": {"mixed_weight_title": true, "pill_labels": true, "big_numbers": true},
     "chart_rules": {"grid_rules_px": 1.5, "grid_rules_color": "black", "texture_fill_for_secondary": "hatch", "isotype": true, "leader_dots": true, "fill": "flat"},
-    "illustration": {"mode": "generate", "kind": "flat_2tone_riso", "prompt_fragment": "flat 2-tone bold-outline editorial vector illustration, palette limited to {recipe_colors}, high contrast, risograph / screen-print look, no text, no gradient", "fallback": "icon_library + isotype", "guardrail_no_ip": true}
+    "illustration": {"mode": "generate", "kind": "flat_2tone_riso", "prompt_fragment": "flat 2-tone bold-outline editorial vector illustration, palette limited to {recipe_colors}, designed for {background_context_or_recipe_background}, high contrast, risograph / screen-print look, no text, no gradient", "fallback": "ask_user_before_icon_library_or_isotype", "guardrail_no_ip": true}
   },
 
   "style_3_metaphor_object": {
@@ -51,7 +52,7 @@
     "fonts": {"title_serious": ["Playfair Display", "serif"], "title_display": ["Anton", "Oswald", "sans-serif"], "body": ["Inter", "sans-serif"]},
     "type_rules": {"theme_matched_typeface": true, "big_number": true, "bracket_captions": true},
     "chart_rules": {"object_as_chart": true, "stamp_badge": true, "leader_dots": true, "whitespace": "high", "object_keeps_native_color": true},
-    "illustration": {"mode": "generate", "kind": "photographic_or_painterly_object_on_cream", "prompt_fragment": "high-quality {photo|thick-paint} illustration of {generic_object}, isolated on warm off-white #EAEADE background, soft natural shadow, centered, no text, editorial infographic poster aesthetic", "guardrail_no_ip": true, "guardrail_note": "Use only generic, non-branded, non-IP objects; no real identifiable people; original wordplay titles only."}
+    "illustration": {"mode": "generate", "kind": "data_integrated_metaphor_object", "prompt_fragment": "high-quality editorial infographic illustration of {generic_object} already transformed by the data: physically sliced, segmented, filled, stacked, or stretched with integrated colored data sections, composed for {background_context_or_fallback_cream}, soft natural shadow adapted to that background, cohesive object-as-chart composition, one consistent material/rendering medium, no text", "guardrail_no_ip": true, "guardrail_note": "Use only generic, non-branded, non-IP objects; no real identifiable people; original wordplay titles only. Generate the data-bearing object and its colored sections as one integrated image; do not create a clean object that requires flat chart overlays. Avoid mismatched material language such as photoreal object plus watercolor/flat fills. For finance, prefer vault compartments, ledger pages, coin stacks, certificates, or storage drawers over liquid/paint metaphors unless the data is literally about liquidity flow. If a PPT workflow provides a background, design the object edge/shadow for that background instead of forcing cream."}
   },
 
   "style_4_corporate_gradient": {
@@ -66,7 +67,7 @@
     "type_rules": {"two_tone_title": true, "step_numbers_gradient": true},
     "chart_rules": {"rounded": true, "soft_shadow": true, "glossy_gradient": true, "white_icons": true, "single_hue_only": true, "levels_by_gradient_depth": true},
     "best_for": ["process", "cycle", "hierarchy", "relationship", "timeline", "map", "comparison_concept"],
-    "illustration": {"mode": "generate", "kind": "flat_vector_gradient", "prompt_fragment": "flat vector illustration of {generic_object_or_isometric_scene}, smooth blue-to-purple gradient fill #00A0FA to #6E14AA, white reversed details, soft drop shadow, rounded friendly shapes, clean corporate infographic, plain white background, no text", "guardrail_no_ip": true}
+    "illustration": {"mode": "optional_generate", "kind": "flat_vector_gradient", "prompt_fragment": "flat vector illustration of {generic_object_or_isometric_scene}, smooth blue-to-purple gradient fill #00A0FA to #5064FA to #6E14AA, white reversed details, soft drop shadow adapted to {background_context_or_fallback_light_gray}, rounded friendly shapes, clean corporate infographic, no text", "use_when": "Only when the user requests a custom vector asset or the data concept genuinely needs a custom object/icon. Otherwise render with code-controlled gradient shapes, cards, connectors, and chart marks.", "guardrail_no_ip": true}
   },
 
   "style_5_magazine_monochrome": {
@@ -85,6 +86,6 @@
     "fonts": {"title": ["Oswald", "Anton", "Archivo Narrow", "sans-serif"], "deck": ["Playfair Display", "Georgia", "serif"], "subhead": ["Oswald", "sans-serif"]},
     "type_rules": {"compressed_bold_title": true, "smallcaps_subhead_underline": true, "big_number_contrast": true, "masthead_label": true, "double_rule": true},
     "chart_rules": {"full_bleed_bg": true, "tints_for_levels": true, "leader_dots": true, "rich_chart_variety": true, "supports": ["donut", "radial_stacked_bar", "radar", "isometric_pictogram", "isometric_cubes", "circular_radial", "bar"]},
-    "illustration": {"mode": "generate", "kind": "isometric_monochrome", "prompt_fragment": "isometric flat illustration of {generic_pictogram_subject}, monochromatic palette in shades of {dominant} plus one cream tone, subtle shadow, editorial magazine infographic style, plain background, no text", "guardrail_no_ip": true}
+    "illustration": {"mode": "generate", "kind": "isometric_monochrome", "prompt_fragment": "isometric flat illustration of {generic_pictogram_subject}, monochromatic palette in shades of {dominant} plus one cream tone, subtle shadow adapted to {background_context_or_recipe_background}, editorial magazine infographic style, no text", "guardrail_no_ip": true}
   }
 }
