@@ -699,6 +699,21 @@ these layout rules protect readability and structural quality.
   or row rules drawn over/along a registered soft grouping field fail the render. If the
   grouping is already clear from color fields, texture, or spacing, remove the line
   instead of lowering its opacity.
+- Register image crops, color fields, and section boundaries as real geometry, not only
+  as pixels already painted on the canvas. When a generated image, background color block,
+  soft table band, or section field has a visible edge, compute its final rendered bounds
+  after crop/scale/placement and register that field before placing cards or labels.
+  Text-bearing cards, KPI tiles, badges, pills, table cells, and label modules must not
+  straddle a registered image/color/section boundary. They must sit fully inside the
+  field with padding, or fully outside it with a clear gutter. In custom renderers, use
+  `layout_guard.require_rects_not_cross_boundary(...)` or an equivalent assertion for
+  every relevant field edge.
+- Do not mix manually fixed overlay coordinates with dynamic image crop geometry. If an
+  overlay card, callout, or label belongs to a generated image field, derive its allowed
+  y/x range from the image field's final pasted rectangle. If the crop, scale, or canvas
+  position changes, overlay positions must be recomputed. A card row must not be allowed
+  to ride across the image bottom, color-field edge, or section break merely because its
+  old hand-tuned coordinate still fits the text.
 - Do not double-frame elements. If a chart mark, illustration fragment, pictogram, object,
   badge, or data shape already has its own outline/stroke, do not place a second outer
   rectangle or border around it merely to contain it. Use internal padding, shadow,
@@ -1314,6 +1329,11 @@ Reject and re-plan before rendering if any of these patterns appear:
 - A dark divider, vertical bar, outline, or rule is drawn exactly along the boundary
   between two already distinct color fields, texture fields, image crops, or whitespace
   zones without adding a specific semantic reading function.
+- A text-bearing card, label box, KPI tile, badge, pill, or table cell straddles the
+  visible edge of an image crop, color block, background band, table stripe, or section
+  field. The container must be fully inside one field or fully outside with a gutter;
+  riding across the boundary makes the layout look accidentally intersected and must be
+  reflowed.
 - A timeline or multi-point dataset is split into many isolated mini-scenes before
   testing a continuous data illustration that expresses the whole change across the page.
 - An outlined chart mark, illustrated object, pictogram, or data shape is placed inside an
@@ -1574,6 +1594,11 @@ We extract **design approach and style, never content**:
       boundary. Color fields, whitespace, and soft background zones are not re-outlined
       unless the added rule has a distinct semantic role such as an axis, table rule,
       measurement guide, or bound callout.
+- [ ] Image/color/section boundary crossing verified. Every generated image crop, color
+      field, table band, and section field with a visible edge has final rendered bounds
+      registered. Text-bearing cards, KPI tiles, label boxes, badges, pills, and table
+      cells sit fully inside one field or fully outside it with a clear gutter; none
+      straddles a field edge after crop/scale/placement.
 - [ ] No double-frame effect is present. An element with its own outline/stroke is not
       wrapped in another border with the same containment role; any outer frame has a
       distinct semantic purpose such as highlight, selection, or warning.
