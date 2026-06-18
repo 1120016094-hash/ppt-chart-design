@@ -111,10 +111,24 @@ When inheriting a PPT background, adapt the chart safely:
    and necessary to express the data. If the data story is "antelope migration route",
    decide whether the antelope or the route is the main carrier; do not turn the animal
    into a road merely because both words appear in the title.
+   If the topic contains two or more category nouns or conceptual categories, run a
+   **common-subject abstraction audit** before choosing an illustration subject. Ask what
+   single parent idea, shared object, shared place, shared process, or shared physical
+   carrier contains all categories. Use that common point as the illustration theme
+   whenever possible, then encode each category as a measured state, layer, mark, gap,
+   branch, shadow, route, or annotation on that common carrier. Do not generate one visual
+   metaphor per category and combine them into a busy hybrid. For example, "marriage" and
+   "divorce" should first be abstracted to a common carrier such as relationship status,
+   civil registration, household bond, paired documents, or a connection line; then the
+   data changes alter that one carrier. If no simple common carrier exists, choose the
+   dominant category as the illustration subject and make the others code-rendered
+   annotations, or fall back to a clearer basic chart.
    Run a **simple-image feasibility test** for upgrade styles:
    - Can a viewer identify the main subject in about one second?
    - Does the image express the data relationship without needing an awkward hybrid?
    - Are there more than two metaphors competing for attention?
+   - If there are multiple categories, does the image use one common carrier instead of
+     separate metaphors for each category?
    - Would removing the secondary subject make the image clearer while preserving the
      data message?
    If the answer shows the image would be complex, uncanny, or visually uncomfortable,
@@ -1097,6 +1111,15 @@ pictograms, or editorial art is used.
   nouns are only context. Secondary elements should support the primary subject as
   background, shadow, trail, small marker, environment, or label anchor. Remove secondary
   elements when they make the visual harder to read, less beautiful, or emotionally odd.
+- Multi-category topics need one shared visual carrier. When the data compares or relates
+  two or more categories, first find their common parent subject instead of illustrating
+  each category literally. The image should usually be built around one shared object,
+  scene, process, or field that all categories belong to. Category differences may become
+  states of that carrier (open/closed, whole/broken, thick/thin, filled/empty,
+  connected/separated), attached marks, layers, gaps, shadows, or label anchors. Avoid
+  prompts that stack several category symbols into one image, such as ring + broken
+  heart + courthouse + ledger, because the result reads as a crowded collage rather than
+  one data idea.
 - Do not force keyword fusion. Combining two concepts into one body is allowed only when
   the fusion is natural to the object and immediately legible, such as a container with a
   fill level or a route drawn beside a migrating subject. It is not allowed when it creates
@@ -1372,10 +1395,10 @@ object/icon; otherwise keep it as a code-rendered corporate template.
   layers that clarify the illustration, not competing main charts.
 - Before every upgrade-style image call, write a short prompt preflight with these fields:
   `primary visual subject`, `secondary/context subjects`, `omitted subjects`,
-  `data behavior`, `why the image stays simple`, and `why no awkward fusion is needed`.
-  If the preflight cannot choose a single primary subject, simplify the concept before
-  calling image generation. The prompt should not list every title keyword as equal
-  objects to combine.
+  `common carrier for multiple categories`, `data behavior`, `why the image stays
+  simple`, and `why no awkward fusion is needed`. If the preflight cannot choose a single
+  primary subject or shared carrier, simplify the concept before calling image generation.
+  The prompt should not list every title keyword as equal objects to combine.
 - Build a list of needed image assets (e.g. 1 continuous data illustration, 1 hero object,
   1 integrated scene, an isometric pictogram field, or a segmented metaphor object). Only
   request N separate spot icons after confirming that a continuous or unified system would
