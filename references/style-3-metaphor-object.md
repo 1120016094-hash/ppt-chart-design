@@ -13,6 +13,13 @@ For "viral / single punchy stat". Concept-driven.
    evidence. The metaphor object should usually be the primary subject. Secondary elements
    may appear as background, trail, shadow, small marker, annotation, or label anchor, but
    they should not mutate the primary object.
+   If the theme has two or more categories, first find their shared parent object or
+   process and make that the metaphor object. The object should represent the common
+   ground, not one category plus decorations for the others. For example, categories such
+   as marriage and divorce should be abstracted to one carrier such as relationship
+   status, civil registration, paired documents, a bond/connection, or household-state
+   transition; category values then alter the carrier through thickness, gap, stamp,
+   layer, split, or position. Do not prompt for a collage of separate category symbols.
 2. Give it an **original** pun/hook title (no copyrighted lyrics/quotes).
 3. One core number, huge, leader-labeled.
 4. Unify the set with a shell: inherited PPT background or cream fallback + red/indigo
@@ -90,6 +97,11 @@ encoding. If a route is secondary to an animal migration story, use a trail, sof
 path, map cue, or leader annotation around the animal; do not turn the animal itself into
 a road. If this rule makes the metaphor weak, switch to a flow/timeline structure or a
 basic chart style instead of forcing the metaphor.
+For multi-category data, the simplicity check must also pass the common-carrier test:
+can the viewer read one shared object/process before noticing category differences? If
+not, remove category-specific objects and encode the categories as states of the shared
+carrier, or keep the illustration contextual and let code-rendered marks carry the exact
+comparison.
 
 **Guardrail (strict):** generic, non-branded, non-IP objects; no real people; original
 wordplay only - extract the metaphor *approach*, not the content.
@@ -103,6 +115,10 @@ wordplay only - extract the metaphor *approach*, not the content.
   chosen physical property of the object, which value each segment/fill/layer/count
   represents, and which labels remain code-rendered. Reject metaphors whose physical
   property does not naturally match the data.
+- Before generating a multi-category object, write the common-carrier decision: the
+  categories, their shared parent idea, the one metaphor object/process chosen from that
+  parent, and which category-specific symbols were intentionally omitted. Reject image
+  prompts that try to include a separate object for every category.
 - Before generating the object, also write the subject-hierarchy decision: primary object,
   secondary/context elements, omitted elements, and why the chosen metaphor remains
   simple. Reject prompts that treat multiple nouns as equal subjects to be fused.
