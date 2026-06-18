@@ -743,6 +743,17 @@ these layout rules protect readability and structural quality.
   background tone, clipping masks, or an unbordered label area instead. A second frame is
   allowed only when it has a different semantic role, such as a selected-state highlight
   or warning callout, and it must not look like an accidental duplicate border.
+- Do not nest data frames inside data frames. A data frame is any visible rounded
+  rectangle, bordered cell, KPI card, data pill, label-value box, mini table cell, or row
+  card whose purpose is to contain a metric, category, value, year, label-value pair, or
+  chart datum. Once a region is already a data frame, its internal data items must be
+  arranged as text, direct labels, ticks, swatches, marks, or peer cells on the same
+  surface - not as another set of floating framed cards. If a parent grouping is needed,
+  make the parent an unframed/soft background field with no card-like border, shadow, or
+  rounded data-container behavior; or remove the child frames and let the parent surface
+  carry the layout. In custom renderers, register every visible data-bearing surface with
+  `layout_guard.add_data_frame(...)`; `assert_clear()` must fail when one data frame is
+  fully contained inside another.
 - Use a clear canvas safe area. As a default for 16:9 PNGs, keep all readable text at
   least 4% of canvas width away from the left/right edge and 4% of canvas height away
   from top/bottom edges, unless a style reference intentionally uses a full-bleed
@@ -890,6 +901,14 @@ these layout rules protect readability and structural quality.
   position, opacity, and size. This creates a multi-border/double-card effect even without
   explicit outlines. Use one card surface plus separate soft ambient overlays that do not
   trace the same contour.
+- Nested data-frame checks are stricter than generic card-background checks. A parent
+  data strip, timeline band, table row, KPI group, or comparison module may not contain
+  separate visible data cards/pills for each item. Use one of these alternatives instead:
+  one shared parent surface with text/marks placed directly on it; peer cells/cards with
+  no enclosing data frame; or a parent soft grouping field registered with
+  `add_soft_grouping_field(...)` and child data frames registered with
+  `add_data_frame(...)`. Do not register a parent data card as only a soft grouping field
+  to bypass the nesting rule if it visually reads as a card.
 - Register and test element bounds. Any render script or manual composition must keep a
   simple list of occupied rectangles for text and collision-relevant graphics. Text boxes
   may overlap only approved text backgrounds, such as their own card surface or a
@@ -1387,6 +1406,11 @@ Reject and re-plan before rendering if any of these patterns appear:
 - An outlined chart mark, illustrated object, pictogram, or data shape is placed inside an
   additional outer rectangle/border that repeats the same containment role and creates a
   double-frame effect.
+- A visible data frame contains another visible data frame. Examples include a rounded
+  timeline/data strip that contains separate rounded year-value cards, a KPI group card
+  that contains smaller KPI cards, a table row card that contains boxed value pills, or a
+  label-value cell placed inside another label-value card. Parent grouping must be a soft
+  unframed field, or child data items must become direct text/marks on the parent surface.
 - Peer data modules use different visual grammars only because one module has a picture.
 - A generated asset is generic topic art instead of a data-specific cell, unit, object,
   context anchor, or hierarchy cue.
@@ -1674,6 +1698,11 @@ We extract **design approach and style, never content**:
 - [ ] No double-frame effect is present. An element with its own outline/stroke is not
       wrapped in another border with the same containment role; any outer frame has a
       distinct semantic purpose such as highlight, selection, or warning.
+- [ ] No nested data frames are present. Visible rounded rectangles, bordered cells, KPI
+      cards, data pills, label-value boxes, mini table cells, and row cards were
+      registered with `layout_guard.add_data_frame(...)`; no registered data frame is
+      fully contained inside another. Parent grouping, when needed, is a soft unframed
+      field rather than another data card.
 - [ ] All repeated data containers use one consistent geometry system: same frame style,
       baseline, padding logic, title/value/supporting-copy order, and chart grammar unless
       a deliberate hierarchy change is visible and justified.
@@ -1817,6 +1846,11 @@ We extract **design approach and style, never content**:
 - [ ] Card surfaces are not nested accidentally. The render does not stack two nearly
       identical rounded rectangles/panels around the same module, which would create a
       double-card or multi-border effect.
+- [ ] Data-frame nesting guard executed. Custom renderers used
+      `layout_guard.add_data_frame(...)` for every visible data-bearing surface and
+      `assert_clear()` found no nested frame pairs. If a parent surface was registered
+      only as `add_soft_grouping_field(...)`, it visually reads as a background field,
+      not as a data card.
 - [ ] Formulas and mixed numeric phrases were laid out from measured text bounding boxes
       with consistent token gaps. If a formula did not fit its zone, it was stacked,
       resized as a group, moved to a separate row, or simplified before rendering.
