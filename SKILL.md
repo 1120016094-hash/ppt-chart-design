@@ -754,6 +754,14 @@ these layout rules protect readability and structural quality.
   carry the layout. In custom renderers, register every visible data-bearing surface with
   `layout_guard.add_data_frame(...)`; `assert_clear()` must fail when one data frame is
   fully contained inside another.
+- A large chart panel can still be a data frame. Do not classify a white rounded chart
+  panel, raised pale card, bordered plot container, timeline strip, or data row surface as
+  a harmless soft grouping field merely because it is large or low-contrast. If it
+  visually reads as the surface containing the data, it counts as a data frame. Either
+  remove that parent surface, or remove all child data frames inside it. In custom
+  renderers, call `layout_guard.add_soft_grouping_field(..., reads_as_data_frame=True)`
+  for any soft field that visually behaves like a card/panel, so nested data-frame checks
+  cannot be bypassed by misregistration.
 - Use a clear canvas safe area. As a default for 16:9 PNGs, keep all readable text at
   least 4% of canvas width away from the left/right edge and 4% of canvas height away
   from top/bottom edges, unless a style reference intentionally uses a full-bleed
@@ -909,6 +917,13 @@ these layout rules protect readability and structural quality.
   `add_soft_grouping_field(...)` and child data frames registered with
   `add_data_frame(...)`. Do not register a parent data card as only a soft grouping field
   to bypass the nesting rule if it visually reads as a card.
+- After deleting a parent/child frame layer, redesign the composition rather than leaving
+  the old spacing behind. Removing a data strip, panel, or card family changes the
+  information architecture: reassign the title zone, plot area, annotation lanes,
+  whitespace, and source/footer positions from scratch. Do not simply erase a rectangle
+  while keeping labels floating in the old empty band. If the deleted frame carried
+  grouping, replace it with alignment, direct labels, shared baselines, subtle ticks,
+  color, or whitespace.
 - Register and test element bounds. Any render script or manual composition must keep a
   simple list of occupied rectangles for text and collision-relevant graphics. Text boxes
   may overlap only approved text backgrounds, such as their own card surface or a
@@ -1411,6 +1426,12 @@ Reject and re-plan before rendering if any of these patterns appear:
   that contains smaller KPI cards, a table row card that contains boxed value pills, or a
   label-value cell placed inside another label-value card. Parent grouping must be a soft
   unframed field, or child data items must become direct text/marks on the parent surface.
+- A large rounded chart panel, pale card-like plot surface, data strip, or row band
+  contains smaller visible data frames but was registered only as a soft grouping field.
+  Visual reading overrides implementation naming: if it looks like a parent data frame,
+  it must be checked as one.
+- A frame/card layer was removed but the old layout was not redesigned, leaving labels,
+  values, annotations, or source notes floating in an empty former-card band.
 - Peer data modules use different visual grammars only because one module has a picture.
 - A generated asset is generic topic art instead of a data-specific cell, unit, object,
   context anchor, or hierarchy cue.
@@ -1703,6 +1724,15 @@ We extract **design approach and style, never content**:
       registered with `layout_guard.add_data_frame(...)`; no registered data frame is
       fully contained inside another. Parent grouping, when needed, is a soft unframed
       field rather than another data card.
+- [ ] Card-like soft fields were classified honestly. Any large white/pale rounded panel,
+      raised plot container, timeline strip, data row surface, or soft field that visually
+      behaves like a parent data frame was registered with
+      `layout_guard.add_soft_grouping_field(..., reads_as_data_frame=True)` or
+      `layout_guard.add_data_frame(...)`, so it could not bypass nested-frame checks.
+- [ ] Removed-frame redesign verified. If a parent data frame, strip, or card layer was
+      removed, the plot area, annotation lane, labels, whitespace, and footer were
+      re-planned as a new composition; no text or values remain floating in the empty
+      space where the old frame used to be.
 - [ ] All repeated data containers use one consistent geometry system: same frame style,
       baseline, padding logic, title/value/supporting-copy order, and chart grammar unless
       a deliberate hierarchy change is visible and justified.
@@ -1851,6 +1881,10 @@ We extract **design approach and style, never content**:
       `assert_clear()` found no nested frame pairs. If a parent surface was registered
       only as `add_soft_grouping_field(...)`, it visually reads as a background field,
       not as a data card.
+- [ ] Soft grouping registration was not used to hide a frame. Any soft grouping field
+      that contains data frames was visually checked: if it has card-like fill, border,
+      shadow, rounded enclosure, or panel behavior, it was re-registered with
+      `reads_as_data_frame=True` or the child frames were removed.
 - [ ] Formulas and mixed numeric phrases were laid out from measured text bounding boxes
       with consistent token gaps. If a formula did not fit its zone, it was stacked,
       resized as a group, moved to a separate row, or simplified before rendering.
