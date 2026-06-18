@@ -803,6 +803,21 @@ these layout rules protect readability and structural quality.
   connector dots, track outlines, zero axes, hard edges of ambient blobs, neighboring
   labels, or panel/card edges. When a collision is detected, change the layout system,
   not just the color.
+- Register container boundaries, not only data marks. Row backgrounds, alternating table
+  bands, cards, pills, plot panels, summary strips, and soft color fields are still real
+  layout containers even when they are pale or borderless. Any text visually placed
+  inside one of these containers must have a measured text stack and must pass
+  `layout_guard.require_inside(...)` against that container with explicit padding. Do not
+  draw a rounded row band and then place value labels or notes by absolute coordinates
+  without checking their union bbox against the band. If the text touches or crosses the
+  rounded corner, row edge, panel boundary, or table boundary, the render fails even when
+  the text does not overlap a chart mark.
+- Value columns and note columns need declared cells. Outside value labels, right-side
+  notes, remarks, units, and metadata must be placed inside a reserved value/note cell
+  with measured left/right/top/bottom padding. The renderer must check the union bbox of
+  the value phrase plus its note against that cell. If the longest note cannot fit with
+  padding, widen the cell, wrap/shorten the note, reduce the whole note role, or move the
+  note to a separate lane; do not let it run into a table/background boundary.
 - Treat the "approved text background" exception as strictly scoped. A circle, bubble,
   badge, pill, label background, or colored dot may be allowed to sit behind the text it
   owns, but that does not make it invisible to the rest of the layout. It must still fit
