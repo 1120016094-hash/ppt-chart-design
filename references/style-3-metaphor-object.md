@@ -94,7 +94,9 @@ lines, photo cut-out + collage with halftone, generous whitespace, single focal 
   visible edge/contour. Use a fixed edge gap, usually 10-14 px at 16:9 slide scale, and
   verify the spread is no more than 1.5 px after final crop/scale. Do not let one line
   enter the body texture while another floats far above the edge; both are failed
-  edge-landing geometry.
+  edge-landing geometry. The visible edge/contour must be pixel-, mask-, vector-, or
+  mark-geometry verified after final image placement. Manually typed edge coordinates are
+  only hints and cannot be the sole basis for passing the edge-gap check.
 - Leader lines must also attach to the corresponding external label group, not merely run
   across the page near it. For each line, define two anchors before drawing: one anchor
   inside/on the exact object segment and one anchor on the related title-number-note label

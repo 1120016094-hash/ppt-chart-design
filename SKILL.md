@@ -1188,11 +1188,14 @@ these layout rules protect readability and structural quality.
   `add_bound_connector_path(...)` or implement the same check.
 - The graphic-side endpoint gap must be measured against the true visible mark edge, not
   against an arbitrary target rectangle in empty space. For non-rectangular generated
-  illustrations, inspect the final bitmap and declare the actual silhouette/contour edge
-  point for each connector after image scale/crop. Then draw the endpoint at a fixed gap
-  outside that edge and verify all peer leader gaps as a group. If a target edge cannot
-  be identified cleanly, move the label, choose a different edge, crop/regenerate the
-  image, or remove the connector; do not guess a distant target zone.
+  illustrations, derive the actual silhouette/contour edge point for each connector from
+  the final bitmap, a segmentation/alpha mask, vector geometry, or measured mark geometry
+  after image scale/crop. Hand-written coordinates are allowed only as an initial hint;
+  they must be verified against the image/mask before they can be used for edge-gap
+  equality. Then draw the endpoint at a fixed gap outside that edge and verify all peer
+  leader gaps as a group. If a target edge cannot be identified cleanly, move the label,
+  choose a different edge, crop/regenerate the image, or remove the connector; do not
+  guess a distant target zone.
 - Do not replace a required connector with a legend marker. A colored dot, swatch, tick,
   or underline beside the label is only valid when the data-bearing mark is immediately
   adjacent to that label and the two read as one local unit. If the corresponding mark is
@@ -1605,6 +1608,9 @@ Reject and re-plan before rendering if any of these patterns appear:
   target-side edge gaps, or any leader endpoint enters the illustration body/texture or
   floats far from its visible edge. The endpoint-to-edge distance must be measured from
   the final bitmap's true edge/contour, not from a guessed target point.
+- Edge-gap equality is checked only against manually typed target coordinates rather than
+  pixel/mask/vector-verified edge points. This is a false pass: all endpoints can be
+  equally distant from the wrong point while still covering the illustration.
 - A connector uses a bend, dogleg, bracket shape, multi-segment route, or prominent
   floating endpoint dots when a single short straight segment between the data label and
   the corresponding graphic would be clear and unobstructed. This is over-routing; it
