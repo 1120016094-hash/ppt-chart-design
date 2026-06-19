@@ -711,10 +711,18 @@ these layout rules protect readability and structural quality.
   containers, badges, and any decorative-looking vector shape. The role must be one of
   the guard's information roles such as `data_mark`, `bar_segment`, `rank_node`,
   `step_node`, `connector`, `label_anchor`, `icon_container`, `selected_highlight`,
-  `grouping_field`, or `flow_marker`. Roles such as `decorative`, `ambient`, `blob`,
-  `filler`, `empty_space_fill`, and `style_polish` are forbidden and must make the
-  renderer fail before saving. Do not draw raw shape loops named `ambient`, `blob`, or
-  `decoration` outside the guard.
+  `grouping_field`, `flow_marker`, `benchmark_marker`, `threshold_marker`,
+  `event_marker`, or `endpoint_label_anchor`. Vague roles such as `reference_marker`,
+  `decorative`, `ambient`, `blob`, `filler`, `empty_space_fill`, and `style_polish` are
+  forbidden and must make the renderer fail before saving. Do not draw raw shape loops
+  named `ambient`, `blob`, `reference`, or `decoration` outside the guard.
+- Do not add separate endpoint dots to bars, progress strips, timelines, or flow lines
+  when the mark already has a clear rounded/flat end and an adjacent value label. An
+  endpoint marker is allowed only when it adds a distinct role that the mark does not
+  already express: benchmark, threshold, event, selected endpoint, connector landing
+  point, or label anchor. If the dot only says "the bar ends here", remove it. Use
+  `endpoint_label_anchor`, `benchmark_marker`, `threshold_marker`, or `event_marker`
+  only when that role is explicitly documented in the construction plan.
 - Do not trace an already clear color-field boundary with an extra hard divider. If two
   background color blocks, texture zones, image crop regions, whitespace bands, or soft
   fields already separate sections, their contrast and spacing are the separator. Adding a
@@ -958,6 +966,11 @@ these layout rules protect readability and structural quality.
   must call `layout_guard.add_visible_shape(...)` with its information role before it is
   rendered. If a shape cannot be registered with an allowed role, delete it instead of
   lowering opacity, moving it to a corner, or calling it background polish.
+- Endpoint markers need a redundancy check before registration. If a bar/strip/line
+  endpoint is already visible from the mark geometry and exact value text sits nearby,
+  a separate dot, ring, cap, or knob is redundant and must not be registered. Register an
+  endpoint shape only when it is a real threshold/benchmark/event/selection marker or a
+  connector landing point that is used by another visible annotation.
 - Register container boundaries, not only data marks. Row backgrounds, alternating table
   bands, cards, pills, plot panels, summary strips, and soft color fields are still real
   layout containers even when they are pale or borderless. Any text visually placed
@@ -1432,6 +1445,10 @@ Reject and re-plan before rendering if any of these patterns appear:
   highlight patch is drawn without a registered information role. Naming it `ambient`,
   `decorative`, `style polish`, or `empty-space filler` is an automatic rejection; the
   shape must either become a real data/grouping/label/flow element or be removed.
+- A dot, ring, knob, or cap is added to the endpoint of a bar/progress strip/line only to
+  decorate or emphasize that the mark ends there. If the end is already visible from the
+  bar geometry and value label, the extra endpoint shape is duplicate expression and must
+  be removed. A generic `reference_marker` role is not accepted.
 - A text-bearing card, label box, KPI tile, badge, pill, or table cell straddles the
   visible edge of an image crop, color block, background band, table stripe, or section
   field. The container must be fully inside one field or fully outside with a gutter;
@@ -1738,6 +1755,10 @@ We extract **design approach and style, never content**:
       registered with `layout_guard.add_visible_shape(...)` and has an allowed
       information role. No raw `ambient`/`blob`/`decorative` drawing loop remains in the
       renderer.
+- [ ] Endpoint marker redundancy checked. Bars, progress strips, timelines, and flow
+      lines do not carry extra dots/rings/knobs merely to mark a visible end. Any endpoint
+      marker that remains is a documented benchmark, threshold, event, selected endpoint,
+      connector landing point, or label anchor.
 - [ ] Image/color/section boundary crossing verified. Every generated image crop, color
       field, table band, and section field with a visible edge has final rendered bounds
       registered. Text-bearing cards, KPI tiles, label boxes, badges, pills, and table
