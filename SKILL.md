@@ -819,6 +819,14 @@ these layout rules protect readability and structural quality.
   least 4% of canvas width away from the left/right edge and 4% of canvas height away
   from top/bottom edges, unless a style reference intentionally uses a full-bleed
   masthead. If text is larger than normal body text, increase safe area.
+- Source notes, unit notes, footnotes, and bottom annotations use a fixed footer anchor.
+  Unless the user or upstream PPT template explicitly specifies another footer system,
+  place the final rendered annotation text bbox so its bottom edge is exactly 50 px above
+  the canvas bottom. Do not eyeball the y coordinate or rely on font baselines; measure
+  the final text bbox and verify it. In custom renderers, use
+  `layout_guard.require_bottom_distance(...)` or an equivalent assertion. This footer
+  rule overrides the generic 4% bottom safe-area for footer annotations only; titles,
+  labels, values, and other readable text still follow the normal safe-area rule.
 - Keep module gutters visible. Adjacent panels, cards, plot areas, and background blocks
   must have a gutter large enough to read as deliberate separation. As a default, the
   gutter should be at least the body-text line height or 2% of canvas width, whichever is
@@ -1941,6 +1949,10 @@ We extract **design approach and style, never content**:
 - [ ] Header and source zones are protected. Titles/subtitles are not cropped, hidden
       behind panels, or forced into a single crowded line; source notes do not collide
       with bottom rules or the canvas edge.
+- [ ] Footer annotation position verified. Source notes, unit notes, footnotes, and
+      bottom annotations use a measured bbox whose bottom edge is 50 px above the canvas
+      bottom, unless the user/upstream PPT template explicitly provides a different
+      footer anchor.
 - [ ] Exactly one style applied; palette/fonts pulled from tokens (not improvised).
 - [ ] Background follows the upstream PPT/deck background plan when available; style
       background tokens were used only as fallback. Complete and clean PNG backgrounds

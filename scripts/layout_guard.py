@@ -191,6 +191,7 @@ class LayoutGuard:
         self.source_title_requirements: List[Tuple[str, str, str]] = []
         self.peer_treatment_requirements: List[Tuple[str, List[str]]] = []
         self.connector_edge_gap_groups: List[Tuple[str, List[Tuple[Point, Point]], float, float, float]] = []
+        self.bottom_distance_requirements: List[Tuple[str, Rect, float, float]] = []
 
     def add_text_box(self, name: str, rect: Rect, pad: Optional[float] = None, text: Optional[str] = None) -> Box:
         box = Box("text", name, rect, "text").padded(self.default_gap if pad is None else pad)
@@ -403,6 +404,10 @@ class LayoutGuard:
         if len(pairs) < 2:
             raise ValueError("connector edge gap group requires at least two endpoint/edge pairs")
         self.connector_edge_gap_groups.append((name, pairs, expected_gap, tolerance, equal_tolerance))
+
+    def require_bottom_distance(self, name: str, rect: Rect, distance: float = 50, tolerance: float = 2) -> None:
+        """Require an item's final bounding-box bottom to sit a fixed distance above canvas bottom."""
+        self.bottom_distance_requirements.append((name, rect, distance, tolerance))
 
     def add_divider_line(
         self,
@@ -763,6 +768,13 @@ class LayoutGuard:
                     f"{name} connector edge gaps are inconsistent "
                     f"(min {min(distances):.1f}px, max {max(distances):.1f}px, "
                     f"allowed spread {equal_tolerance:.1f}px)"
+                )
+        for name, rect, distance, tolerance in self.bottom_distance_requirements:
+            actual = self.canvas_size[1] - rect[3]
+            if abs(actual - distance) > tolerance:
+                failures.append(
+                    f"{name} bottom distance is {actual:.1f}px, "
+                    f"expected {distance:.1f}px ± {tolerance:.1f}px"
                 )
         for outer in self.data_frames:
             for inner in self.data_frames:
