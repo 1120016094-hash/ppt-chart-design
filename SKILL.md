@@ -705,6 +705,16 @@ these layout rules protect readability and structural quality.
   purpose is "make the page less empty" or "match the style" must be removed. If a
   decorative-looking shape remains, write its role in the construction plan and register
   it accordingly; otherwise it fails the chart.
+- Register every visible non-text abstract shape with
+  `layout_guard.add_visible_shape(...)` before drawing it. This includes blobs,
+  ellipses, waves, gradient patches, ambient circles, soft highlight patches, icon
+  containers, badges, and any decorative-looking vector shape. The role must be one of
+  the guard's information roles such as `data_mark`, `bar_segment`, `rank_node`,
+  `step_node`, `connector`, `label_anchor`, `icon_container`, `selected_highlight`,
+  `grouping_field`, or `flow_marker`. Roles such as `decorative`, `ambient`, `blob`,
+  `filler`, `empty_space_fill`, and `style_polish` are forbidden and must make the
+  renderer fail before saving. Do not draw raw shape loops named `ambient`, `blob`, or
+  `decoration` outside the guard.
 - Do not trace an already clear color-field boundary with an extra hard divider. If two
   background color blocks, texture zones, image crop regions, whitespace bands, or soft
   fields already separate sections, their contrast and spacing are the separator. Adding a
@@ -943,6 +953,11 @@ these layout rules protect readability and structural quality.
   plus a row divider is allowed only when the divider has a necessary semantic function
   that color/spacing cannot provide; otherwise `layout_guard.add_divider_line(...)`
   should make the render fail and the script should remove the divider.
+- Register visible abstract shapes in the same guard pass. Any ellipse, gradient blob,
+  wave, abstract patch, icon circle, or soft highlight drawn directly by PIL/SVG/canvas
+  must call `layout_guard.add_visible_shape(...)` with its information role before it is
+  rendered. If a shape cannot be registered with an allowed role, delete it instead of
+  lowering opacity, moving it to a corner, or calling it background polish.
 - Register container boundaries, not only data marks. Row backgrounds, alternating table
   bands, cards, pills, plot panels, summary strips, and soft color fields are still real
   layout containers even when they are pale or borderless. Any text visually placed
@@ -1413,6 +1428,10 @@ Reject and re-plan before rendering if any of these patterns appear:
 - A dark divider, vertical bar, outline, or rule is drawn exactly along the boundary
   between two already distinct color fields, texture fields, image crops, or whitespace
   zones without adding a specific semantic reading function.
+- A visible abstract shape, blob, ellipse, wave, gradient patch, icon circle, badge, or
+  highlight patch is drawn without a registered information role. Naming it `ambient`,
+  `decorative`, `style polish`, or `empty-space filler` is an automatic rejection; the
+  shape must either become a real data/grouping/label/flow element or be removed.
 - A text-bearing card, label box, KPI tile, badge, pill, or table cell straddles the
   visible edge of an image crop, color block, background band, table stripe, or section
   field. The container must be fully inside one field or fully outside with a gutter;
@@ -1714,6 +1733,11 @@ We extract **design approach and style, never content**:
       boundary. Color fields, whitespace, and soft background zones are not re-outlined
       unless the added rule has a distinct semantic role such as an axis, table rule,
       measurement guide, or bound callout.
+- [ ] No filler shapes are present. Every visible blob, ellipse, wave, gradient patch,
+      ambient circle, icon container, badge, soft highlight, and abstract vector shape was
+      registered with `layout_guard.add_visible_shape(...)` and has an allowed
+      information role. No raw `ambient`/`blob`/`decorative` drawing loop remains in the
+      renderer.
 - [ ] Image/color/section boundary crossing verified. Every generated image crop, color
       field, table band, and section field with a visible edge has final rendered bounds
       registered. Text-bearing cards, KPI tiles, label boxes, badges, pills, and table
