@@ -264,6 +264,27 @@ class LayoutGuard:
         self.no_cross_boxes.append(box)
         return box
 
+    def add_subject_keepout_zone(
+        self,
+        name: str,
+        rect: Rect,
+        pad: float = 0,
+        blocks_text: bool = True,
+        blocks_connectors: bool = True,
+    ) -> Box:
+        """Register a dense illustration/mark area that labels and leaders must avoid.
+
+        Use this for animal bodies, faces, product surfaces, dense object interiors,
+        pictogram clusters, and data-shaped marks. It is stricter than ``add_no_cross_zone``
+        when ``blocks_text`` is true because readable text is also forbidden to overlap it.
+        """
+        box = Box("subject_keepout", name, rect, "subject_keepout").padded(pad)
+        if blocks_connectors:
+            self.no_cross_boxes.append(Box("no_cross", name, rect, "no_cross").padded(pad))
+        if blocks_text:
+            self.graphic_boxes.append(Box("graphic", name, rect, "subject_keepout").padded(pad))
+        return box
+
     def add_soft_grouping_field(
         self,
         name: str,

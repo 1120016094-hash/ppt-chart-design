@@ -58,6 +58,10 @@ lines, photo cut-out + collage with halftone, generous whitespace, single focal 
   mapped rhythm. Year/name labels should share a baseline, value labels should share a
   second baseline, and connector starts should be derived from the measured label group.
   Do not stagger label y positions without a data or layout reason.
+- Object-as-chart subjects must leave a clean label rail. If the generated object,
+  animal body, product surface, or dense texture overlaps exact numbers, labels, or
+  leader lines, resize, lower, crop, or regenerate the object before accepting the render.
+  Do not let labels sit on top of the object merely because the object is the chart.
 - Bordered KPI/text cards must center their internal text on the card's visual centerline
   unless the reference style explicitly uses a different alignment. Do not let text sit
   close to the left/top border; preserve generous padding and balanced vertical spacing.

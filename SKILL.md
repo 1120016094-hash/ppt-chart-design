@@ -982,6 +982,16 @@ these layout rules protect readability and structural quality.
   connector dots, track outlines, zero axes, hard edges of ambient blobs, neighboring
   labels, or panel/card edges. When a collision is detected, change the layout system,
   not just the color.
+- Register dense illustration subjects as text keepouts, not only connector keepouts.
+  Generated animals, bodies, faces, product surfaces, object interiors, pictogram
+  clusters, and data-shaped illustration regions are collision-relevant graphics for
+  readable text and numbers. Do not register them only with `add_no_cross_zone(...)`,
+  because that protects connector paths but still allows labels to sit on top of the
+  image. In custom renderers, use `layout_guard.add_subject_keepout_zone(...)` or
+  equivalent text+connector keepout rectangles for the subject areas near labels. If a
+  label rail conflicts with the generated image, first shrink, crop, lower, or regenerate
+  the illustration so the label rail has clean space; do not accept overlap and do not
+  hide the conflict with color or opacity.
 - Register visible separators in the same guard pass. Soft grouping fields and divider
   lines must be declared before final `assert_clear()`. A row background/alternating band
   plus a row divider is allowed only when the divider has a necessary semantic function
@@ -1554,6 +1564,11 @@ Reject and re-plan before rendering if any of these patterns appear:
   notes, animal/person/product subjects, faces/bodies, key generated-object detail, or
   the main data-shaped illustration. Correct endpoints do not save a connector whose
   middle path damages readability or image comprehension.
+- A readable number, unit, label, title, or annotation overlaps a dense generated
+  illustration subject, animal body, face, product surface, pictogram cluster, or
+  data-shaped object interior. This fails even if the text remains technically readable.
+  The fix is to resize/reposition the illustration or move the label to a reserved rail,
+  not to rely on contrast.
 - A required connector is removed and replaced by a local color dot, swatch, tick, or
   underline even though the corresponding data mark sits elsewhere in the image. This
   breaks the label-to-mark relationship; redesign the label placement or route the
@@ -1941,6 +1956,12 @@ We extract **design approach and style, never content**:
 - [ ] Text/number geometry verified after final rendering: no plotted mark, color block,
       axis line, badge, group tag, or illustration overlaps, clips, hides, or visually
       cuts through any readable digit, sign, unit, category label, or annotation.
+- [ ] Dense illustration keepouts registered. Animal/person/product bodies, faces,
+      object interiors, pictogram clusters, and data-shaped illustration regions near
+      labels were registered with `layout_guard.add_subject_keepout_zone(...)` or an
+      equivalent text+connector keepout. If a keepout conflicted with labels, the
+      illustration was scaled, cropped, lowered, regenerated, or the labels were moved to
+      a clean rail before accepting the render.
 - [ ] Collision testing was performed with registered bounding boxes for text and
       collision-relevant graphics. Any overlap between readable text and chart marks,
       decorative arcs, connector dots, hard edges of ambient overlays, zero axes, tracks,
