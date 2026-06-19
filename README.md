@@ -1,6 +1,6 @@
 # ppt-chart-design
 
-A Claude skill that helps non-designers turn data into professional, logically-complete
+skill that helps non-designers turn data into professional, logically-complete
 charts and infographics for presentation slides, rendered as **high-fidelity PNG images**
 in one of five named designer styles.
 
