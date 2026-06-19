@@ -15,6 +15,38 @@ from typing import Iterable, List, Optional, Sequence, Tuple
 Rect = Tuple[float, float, float, float]
 Point = Tuple[float, float]
 
+ALLOWED_VISIBLE_SHAPE_ROLES = {
+    "data_mark",
+    "chart_mark",
+    "bar_segment",
+    "rank_node",
+    "step_node",
+    "pictogram_unit",
+    "connector",
+    "leader",
+    "axis",
+    "reference_marker",
+    "label_anchor",
+    "icon_container",
+    "selected_highlight",
+    "grouping_field",
+    "flow_marker",
+    "image_anchor",
+}
+
+FORBIDDEN_VISIBLE_SHAPE_ROLES = {
+    "",
+    "ambient",
+    "background_noise",
+    "blob",
+    "decorative",
+    "decoration",
+    "empty_space_fill",
+    "filler",
+    "ornament",
+    "style_polish",
+}
+
 
 @dataclass
 class Box:
@@ -144,6 +176,7 @@ class LayoutGuard:
         self.text_boundary_requirements: List[Tuple[str, str, float, float]] = []
         self.axis_systems: List[Tuple[str, Rect, str, str, bool]] = []
         self.data_frames: List[Box] = []
+        self.visible_shapes: List[Box] = []
         self.soft_grouping_fields: List[Box] = []
         self.divider_lines: List[Tuple[str, Point, Point, float, str, float]] = []
         self.text_containers: dict[str, Tuple[Rect, float]] = {}
@@ -159,6 +192,38 @@ class LayoutGuard:
             self.allowed_backgrounds.append(box)
         else:
             self.graphic_boxes.append(box)
+        return box
+
+    def add_visible_shape(
+        self,
+        name: str,
+        rect: Rect,
+        role: str,
+        pad: float = 0,
+        collision_relevant: bool = True,
+    ) -> Box:
+        """Register a visible non-text shape and require an information role.
+
+        Use this for blobs, ellipses, waves, gradient patches, icon containers, badges,
+        highlight fields, nodes, bars, pictogram units, and any other visible abstract
+        shape. The role must explain what the shape does for the chart. Pure style
+        decoration and empty-space fillers are rejected immediately.
+        """
+        normalized = role.strip().lower() if role is not None else ""
+        if normalized in FORBIDDEN_VISIBLE_SHAPE_ROLES:
+            raise ValueError(f"visible shape {name} has forbidden non-informational role: {role!r}")
+        if normalized not in ALLOWED_VISIBLE_SHAPE_ROLES:
+            allowed = ", ".join(sorted(ALLOWED_VISIBLE_SHAPE_ROLES))
+            raise ValueError(
+                f"visible shape {name} role {role!r} is not allowed; "
+                f"use one of: {allowed}"
+            )
+        box = Box("visible_shape", name, rect, normalized).padded(pad)
+        self.visible_shapes.append(box)
+        if normalized == "grouping_field":
+            self.soft_grouping_fields.append(Box("soft_grouping_field", name, rect, "soft_grouping_field").padded(pad))
+        if collision_relevant:
+            self.graphic_boxes.append(Box("graphic", name, rect, normalized).padded(pad))
         return box
 
     def add_panel_edge(self, name: str, rect: Rect, edge_gap: float) -> None:
