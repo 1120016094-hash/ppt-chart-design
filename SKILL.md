@@ -698,6 +698,16 @@ these layout rules protect readability and structural quality.
   continuous illustration, route, terrain, object, flow, or soft background field can
   group the data clearly, use that instead of boxed cells. If a visible rule is necessary,
   make it light, purposeful, and subordinate to the data, not the dominant visual system.
+- Minimize color/background layer count. Unless a color field separates data groups,
+  hierarchy levels, plot regions, or inherited PPT sections, the chart should normally
+  have one visual background system: either the canvas/deck background or the generated
+  image/paper field, not both as obvious nested slabs. Do not place a cream paper image
+  on top of a second pale green/gray canvas, or a full-page image field inside another
+  unrelated full-page field, merely for style. If the generated image already supplies
+  the paper/texture/background, extend it to the canvas or match the canvas to it. In
+  custom renderers, register large canvas/image/panel backgrounds with
+  `layout_guard.add_background_layer(...)`; more than one large non-data background layer
+  must fail unless the added layer is explicitly marked as data-separating.
 - Do not add visible filler shapes. Every visible blob, ellipse, wave, gradient patch,
   abstract circle, icon container, badge, texture block, or ambient shape must have a
   declared information role: encode data, group related content, mark a selected value,
@@ -802,6 +812,14 @@ these layout rules protect readability and structural quality.
   This check must verify equal width/height, shared row or column baseline, no overlap,
   a declared minimum gutter, and near-equal spacing. Do not accept a row of peer cards
   because individual text fits; the group itself must read as one deliberate system.
+- Repeated loose data labels must also use a declared alignment system. When several
+  same-level labels are placed around an illustration, route, timeline, object, or chart
+  mark without visible containers, they still need a grid: shared year/name baseline,
+  shared value baseline, predictable x-spacing or a documented mapped anchor, and a
+  consistent connector start rule. Do not place each label independently just because
+  each one points to a different part of the image. In custom renderers, use
+  `layout_guard.require_y_alignment(...)`, `require_x_alignment(...)`, row-centerline
+  checks, or peer-rect checks for the relevant label rails.
 - Do not hand-place peer card centers independently. Compute peer container positions
   from one grid formula: available span, item count, item width/height, and gutter. If the
   available span cannot fit the planned card width plus gutters, reduce the card width,
@@ -825,6 +843,14 @@ these layout rules protect readability and structural quality.
   the manifest. For Chinese presentation graphics, use typographic symbols such as `→`
   rather than ASCII placeholders such as `->`, unless the source data explicitly uses the
   ASCII form and the user wants it preserved.
+- Visible copy is for the audience, not for explaining the designer's method. Titles,
+  subtitles, notes, and labels must state the data conclusion, context, subject, unit, or
+  source. Do not write design-process language such as "设计思路", "设计概念",
+  "视觉隐喻", "构图", "排版", "融入画面", "作为图表", or phrases that describe how the
+  image was made rather than what the audience should learn. A metaphor title may be
+  poetic, but the supporting copy should still read as a factual data statement. In custom
+  renderers, pass visible strings into `layout_guard.add_text_box(..., text=...)` or
+  `layout_guard.add_text(...)` so the copy guard can catch design-rationale wording.
 - Chinese text wrapping must be designed before drawing. As defaults for 16:9 slide PNGs:
   keep explanatory/body copy between 9 and 18 Chinese characters per line when it is in a
   compact note, use line height of at least 1.25x font size, and leave at least 0.75x body

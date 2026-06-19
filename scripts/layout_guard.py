@@ -173,6 +173,7 @@ class LayoutGuard:
         self.centering_requirements: List[Tuple[str, Rect, Rect, float, float]] = []
         self.inline_centerline_requirements: List[Tuple[str, List[Rect], float]] = []
         self.x_alignment_requirements: List[Tuple[str, List[float], float]] = []
+        self.y_alignment_requirements: List[Tuple[str, List[float], float]] = []
         self.rect_clearance_requirements: List[Tuple[str, Rect, Rect, float]] = []
         self.peer_rect_group_requirements: List[
             Tuple[str, List[Rect], str, float, float, float, float, Optional[float], bool]
@@ -182,13 +183,17 @@ class LayoutGuard:
         self.axis_systems: List[Tuple[str, Rect, str, str, bool]] = []
         self.data_frames: List[Box] = []
         self.visible_shapes: List[Box] = []
+        self.background_layers: List[Tuple[str, Rect, str, bool]] = []
+        self.visible_copy: List[Tuple[str, str]] = []
         self.soft_grouping_fields: List[Box] = []
         self.divider_lines: List[Tuple[str, Point, Point, float, str, float]] = []
         self.text_containers: dict[str, Tuple[Rect, float]] = {}
 
-    def add_text_box(self, name: str, rect: Rect, pad: Optional[float] = None) -> Box:
+    def add_text_box(self, name: str, rect: Rect, pad: Optional[float] = None, text: Optional[str] = None) -> Box:
         box = Box("text", name, rect, "text").padded(self.default_gap if pad is None else pad)
         self.text_boxes.append(box)
+        if text is not None:
+            self.visible_copy.append((name, text))
         return box
 
     def add_graphic_box(self, name: str, rect: Rect, role: str = "forbidden", pad: float = 0) -> Box:
@@ -230,6 +235,21 @@ class LayoutGuard:
         if collision_relevant:
             self.graphic_boxes.append(Box("graphic", name, rect, normalized).padded(pad))
         return box
+
+    def add_background_layer(
+        self,
+        name: str,
+        rect: Rect,
+        role: str = "base",
+        data_separating: bool = False,
+    ) -> None:
+        """Register a large background/surface layer for color-layer discipline.
+
+        Use this for canvas fills, full-page image/paper crops, large soft panels, and
+        broad color fields. More than one large non-data background layer is usually a
+        redundant color stack; prefer one base unless the added field separates data.
+        """
+        self.background_layers.append((name, rect, role, data_separating))
 
     def add_panel_edge(self, name: str, rect: Rect, edge_gap: float) -> None:
         x0, y0, x1, y1 = rect
@@ -454,7 +474,7 @@ class LayoutGuard:
 
     def add_text(self, draw, name: str, xy: Tuple[float, float], text: str, font, anchor: str = "la",
                  pad: Optional[float] = None) -> Box:
-        return self.add_text_box(name, self.text_bbox(draw, xy, text, font, anchor), pad)
+        return self.add_text_box(name, self.text_bbox(draw, xy, text, font, anchor), pad, text=text)
 
     def assert_inside(self, name: str, outer: Rect, inner: Rect, pad: float) -> None:
         if not contains(outer, inner, pad):
@@ -603,6 +623,10 @@ class LayoutGuard:
         """Require several x coordinates to share one declared alignment lane."""
         self.x_alignment_requirements.append((name, list(xs), tolerance_x))
 
+    def require_y_alignment(self, name: str, ys: Sequence[float], tolerance_y: float = 2) -> None:
+        """Require several y coordinates to share one declared baseline/rail."""
+        self.y_alignment_requirements.append((name, list(ys), tolerance_y))
+
     def require_all_text_inside_canvas(self, pad: float) -> None:
         w, h = self.canvas_size
         canvas = (0, 0, w, h)
@@ -611,6 +635,35 @@ class LayoutGuard:
 
     def assert_clear(self, extra_forbidden: Sequence[Box] = ()) -> None:
         failures = []
+        canvas_area = self.canvas_size[0] * self.canvas_size[1]
+        large_non_data_layers = []
+        for name, rect, role, data_separating in self.background_layers:
+            area = max(0, rect[2] - rect[0]) * max(0, rect[3] - rect[1])
+            if area >= canvas_area * 0.70 and not data_separating:
+                large_non_data_layers.append((name, role, area))
+        if len(large_non_data_layers) > 1:
+            names = ", ".join(f"{name}({role})" for name, role, _ in large_non_data_layers)
+            failures.append(
+                f"multiple large non-data background layers are registered: {names}; "
+                "merge them or mark the added layer as data_separating"
+            )
+        forbidden_copy_fragments = [
+            "设计思路",
+            "设计概念",
+            "视觉隐喻",
+            "构图",
+            "排版",
+            "刻进",
+            "融入画面",
+            "作为图表",
+            "图表设计",
+        ]
+        for copy_name, text in self.visible_copy:
+            for fragment in forbidden_copy_fragments:
+                if fragment in text:
+                    failures.append(
+                        f"{copy_name} visible copy contains design-rationale wording: {fragment}"
+                    )
         independent_axes = [axis for axis in self.axis_systems if axis[4]]
         if len(independent_axes) > 1:
             names = ", ".join(axis[0] for axis in independent_axes)
@@ -766,6 +819,15 @@ class LayoutGuard:
                         failures.append(
                             f"{name} x lane {i} offset is {x - target:.1f}px, "
                             f"beyond tolerance {tolerance_x}px"
+                        )
+        for name, ys, tolerance_y in self.y_alignment_requirements:
+            if ys:
+                target = ys[0]
+                for i, y in enumerate(ys):
+                    if abs(y - target) > tolerance_y:
+                        failures.append(
+                            f"{name} y lane {i} offset is {y - target:.1f}px, "
+                            f"beyond tolerance {tolerance_y}px"
                         )
         semantic_line_roles = {
             "axis",

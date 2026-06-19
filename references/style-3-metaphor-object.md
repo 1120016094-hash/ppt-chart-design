@@ -31,6 +31,10 @@ own natural colors**; red/indigo only on title, leader lines, badge, key numbers
 If an upstream PPT workflow provides a slide/deck background, inherit it and adapt text,
 stamp, shadow, and object edge treatment for contrast. Do not force a cream rectangle
 behind the object unless the deck design explicitly uses cream panels.
+If the generated object asset already contains a cream/paper/texture field, treat that
+field as the chart background and extend or crop it to the full canvas. Do not place it
+as a smaller rectangle on top of a second fallback background unless that outer field
+separates data or is required by the upstream PPT design system.
 
 **Type:** expressive, matched to subject - serif (Playfair) for solemn, distressed/bold
 (Anton) for edgy. Core number always huge bold. Captions in [brackets]. Keep editorial
@@ -50,6 +54,10 @@ lines, photo cut-out + collage with halftone, generous whitespace, single focal 
   text-stack contract and typographic alignment spine before rendering. Poster looseness
   does not permit arbitrary text placement; title, focal number, units, captions, badges,
   and external labels must use declared anchors, baselines, and gutters.
+- Same-level external data labels must use one calm label rail or a clearly documented
+  mapped rhythm. Year/name labels should share a baseline, value labels should share a
+  second baseline, and connector starts should be derived from the measured label group.
+  Do not stagger label y positions without a data or layout reason.
 - Bordered KPI/text cards must center their internal text on the card's visual centerline
   unless the reference style explicitly uses a different alignment. Do not let text sit
   close to the left/top border; preserve generous padding and balanced vertical spacing.
