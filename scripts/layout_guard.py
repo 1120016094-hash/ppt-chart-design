@@ -164,6 +164,8 @@ class LayoutGuard:
         self.connector_paths: List[Tuple[str, List[Point], float]] = []
         self.connector_bindings: List[Tuple[str, List[Point], Rect, Rect, float]] = []
         self.connector_endpoint_gaps: List[Tuple[str, Point, Rect, float, Optional[float], str]] = []
+        self.edge_target_connectors: List[Tuple[str, List[Point], Rect, Optional[Rect]]] = []
+        self.endpoint_marker_ban_zones: List[Tuple[str, Rect]] = []
         self.required_zones: List[Tuple[str, Rect, Rect, float]] = []
         self.semantic_modules: dict[str, Rect] = {}
         self.semantic_placements: List[Tuple[str, str, Rect, float]] = []
@@ -404,6 +406,48 @@ class LayoutGuard:
             min_endpoint_gap=min_endpoint_gap,
             max_endpoint_gap=max_endpoint_gap,
         )
+
+    def add_edge_target_connector_path(
+        self,
+        name: str,
+        points: Sequence[Point],
+        label_rect: Rect,
+        target_edge_zone: Rect,
+        target_interior_keepout_rect: Optional[Rect] = None,
+        width: float = 2,
+        pad: float = 6,
+        min_label_gap: float = 8,
+        max_label_gap: float = 36,
+    ) -> Box:
+        """Register a connector whose graphic endpoint must land on an edge corridor.
+
+        Use this for generated metaphor objects, portraits, animals, product heroes, and
+        other illustration-as-chart assets where a leader should point to the relevant
+        visible boundary rather than pierce the subject interior. ``target_edge_zone`` is
+        the legal landing corridor on or just outside the object/segment edge.
+        ``target_interior_keepout_rect`` is the protected interior that the path must not
+        enter; omit it only for simple rectangular marks where edge and interior are the
+        same semantic target.
+        """
+        box = self.add_bound_connector_path(
+            name=name,
+            points=points,
+            label_anchor_zone=expand_rect(label_rect, max_label_gap),
+            target_anchor_zone=target_edge_zone,
+            width=width,
+            pad=pad,
+            label_keepout_rect=label_rect,
+            target_keepout_rect=None,
+            min_endpoint_gap=min_label_gap,
+            max_endpoint_gap=max_label_gap,
+        )
+        path = [(float(x), float(y)) for x, y in points]
+        self.edge_target_connectors.append((name, path, target_edge_zone, target_interior_keepout_rect))
+        return box
+
+    def forbid_endpoint_markers_in_zone(self, name: str, rect: Rect, pad: float = 0) -> None:
+        """Disallow connector endpoint dots/anchors inside a protected image zone."""
+        self.endpoint_marker_ban_zones.append((name, expand_rect(rect, pad)))
 
     def text_bbox(self, draw, xy: Tuple[float, float], text: str, font, anchor: str = "la") -> Rect:
         return draw.textbbox(xy, text, font=font, anchor=anchor)
@@ -798,6 +842,22 @@ class LayoutGuard:
                 failures.append(
                     f"{connector_name} {endpoint_name} endpoint is farther than {max_gap}px from its keepout zone"
                 )
+        for connector_name, points, target_edge_zone, target_interior_keepout in self.edge_target_connectors:
+            endpoint = points[-1]
+            if not point_in_rect(endpoint, target_edge_zone):
+                failures.append(f"{connector_name} does not end in its target edge corridor")
+            if target_interior_keepout is not None:
+                if point_in_rect(endpoint, target_interior_keepout):
+                    failures.append(f"{connector_name} endpoint lands inside protected target interior")
+                for start, end in zip(points, points[1:]):
+                    if segment_intersects_rect(start, end, target_interior_keepout):
+                        failures.append(f"{connector_name} crosses protected target interior")
+                        break
+        endpoint_marker_roles = {"label_anchor", "endpoint_label_anchor"}
+        for zone_name, zone_rect in self.endpoint_marker_ban_zones:
+            for shape in self.visible_shapes:
+                if shape.role in endpoint_marker_roles and intersects(shape.rect, zone_rect):
+                    failures.append(f"{shape.name} endpoint marker is inside banned zone {zone_name}")
         if failures:
             joined = "\n".join(f"  - {f}" for f in failures)
             raise ValueError("layout collision check failed:\n" + joined)

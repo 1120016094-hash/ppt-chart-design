@@ -42,8 +42,8 @@ smaller size, usually no more than 40-45% of the title height, and keep the note
 another step smaller. Prefer two short subtitle lines over one dense line; use generous
 leading and avoid compressing title, subtitle, and note into one tight block.
 
-**Motifs:** circular postmark/stamp badge (curved text), leader lines + dots, photo
-cut-out + collage with halftone, generous whitespace, single focal point.
+**Motifs:** circular postmark/stamp badge (curved text), simple edge-landing leader
+lines, photo cut-out + collage with halftone, generous whitespace, single focal point.
 
 **Annotation layout rules (strict):**
 - Follow the global frontend-design typography rules in `SKILL.md`: define a measured
@@ -57,10 +57,17 @@ cut-out + collage with halftone, generous whitespace, single focal point.
   and the largest number should sit optically in the middle of the card.
 - Circular stamps/badges must keep all text comfortably inside the inner ring. Reduce
   type size before allowing text to crowd the ring; center all lines optically.
-- Leader lines must terminate inside the exact corresponding data-bearing color block,
-  drawer, slice, layer, or segment, with a visible dot placed on that block. They must not
-  point to shadows, object frames, gaps, or nearby but unrelated colors. When the generated
-  object has perspective, choose anchor points manually after inspecting the render.
+- Leader lines must terminate at the exact corresponding data-bearing color block,
+  drawer, slice, layer, contour, or segment. For simple geometric marks they may land
+  inside the mark; for generated object/animal/product illustrations they must land on
+  the nearest semantically correct visible edge or just outside that edge, not in the
+  subject center. Do not draw lines through bodies, faces, product surfaces, dense
+  textures, or the main illustration mass. Target-side endpoint dots are normally
+  disabled for object-as-chart illustrations because they damage the object; if a marker
+  is needed, use a tiny external tick/dot in adjacent empty space, never a dot on the
+  illustration body. Lines must not point to shadows, object frames, gaps, or nearby but
+  unrelated colors. When the generated object has perspective, choose anchor points
+  manually after inspecting the render.
 - Leader lines must also attach to the corresponding external label group, not merely run
   across the page near it. For each line, define two anchors before drawing: one anchor
   inside/on the exact object segment and one anchor on the related title-number-note label

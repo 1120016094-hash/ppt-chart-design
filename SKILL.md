@@ -1056,11 +1056,23 @@ these layout rules protect readability and structural quality.
   real mark hotspots/edge corridors from the drawn geometry. A connector endpoint that is
   merely floating between two antlers, over blank background, or near a general scene
   detail fails even if it sits inside a manually declared zone.
+- For generated metaphor objects, animal bodies, portraits, product heroes, and other
+  illustration-as-chart assets, the graphic-side anchor must normally be the relevant
+  **visible edge/boundary** of the object part, not the center of the object, body,
+  face, or segment. The leader's job is to identify the corresponding part without
+  damaging the illustration. Stop the line at or just outside the boundary edge with a
+  small gap; do not drive the stroke into fur, skin, faces, product surfaces, dense
+  texture, or the visual center merely because that point is easy to compute. In custom
+  renderers, use `layout_guard.add_edge_target_connector_path(...)` for these cases and
+  pass a protected interior keepout zone. Target-side endpoint dots are disabled by
+  default for illustration-as-chart assets; if a marker is absolutely necessary, place a
+  small tick or dot in adjacent empty space outside the subject edge and document its
+  semantic role. Do not place a circular endpoint marker on the illustration body.
 - Register connector paths and no-cross zones before drawing. Any leader line, callout
   line, bracket, arrow, or dot-line is itself a collision-relevant object, not harmless
   decoration. In PIL/custom renderers, use `scripts/layout_guard.py` methods such as
   `add_connector_path(...)`, `add_measured_connector_path(...)`,
-  `add_bound_connector_path(...)`, and
+  `add_bound_connector_path(...)`, `add_edge_target_connector_path(...)`, and
   `add_no_cross_zone(...)` or an equivalent implementation.
   Register every readable number, formula, unit, source note, and label group as text
   boxes; register subject-dense image regions such as animal bodies, faces, product
@@ -1141,6 +1153,12 @@ these layout rules protect readability and structural quality.
   dot must sit inside the data-bearing colored region, not on a nearby shadow, border,
   background, or unrelated texture. When the line points to text, it must meet the label
   group's edge or anchor dot with consistent padding.
+- When the target is a generated illustration rather than a simple chart mark, "meet the
+  target" means meet the nearest semantically correct edge, silhouette, contour, route
+  edge, plume edge, orbit edge, or object-part boundary. It does not mean piercing the
+  center of the object or placing a dot on top of the subject. The image prompt/crop plan
+  and final layout must leave usable edge landing zones for labels; if the only possible
+  anchors are inside the subject, regenerate/re-crop the image or move labels closer.
 - Connector endpoint markers must use one declared geometry. In a connector group, both
   endpoint dots and all peer connector dots must share the same radius, stroke, fill
   rule, and optical weight unless a deliberate hierarchy encoding is documented. Do not
