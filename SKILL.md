@@ -13,6 +13,10 @@ description: >
 
 # PPT Chart Design
 
+## License Notice
+
+All rights reserved. 未经许可不得修改、分发、商用。
+
 Helps non-designers turn data into professional, well-reasoned presentation charts.
 The value is two systems: (1) a decision logic for **which chart** and **which style**,
 and (2) a faithful **design system** distilled from five professional designers.
